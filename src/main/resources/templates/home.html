@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+<h1>홈</h1>
+<h1 th:if="${#session?.getAttribute('uid')}">로그인 된 상태</h1>
+<a th:if="${#session?.getAttribute('uid')}" th:href="@{|login/logout|}">로그 아웃 하기</a>
+
+</body>
+</html>
