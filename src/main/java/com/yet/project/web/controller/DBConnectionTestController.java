@@ -17,7 +17,7 @@ public class DBConnectionTestController {
     @RequestMapping("/getUser/{uid}")
     @ResponseBody
     String getUserInfo(@PathVariable Long uid) {
-        User user = userDao.getUserById(uid);
+        User user = userDao.findUserById(uid);
         return "안녕하세요 이름: " + user.getName() + ", uid: " + user.getUid();
     }
 }

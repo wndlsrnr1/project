@@ -1,22 +1,17 @@
 package com.yet.project.web.dto.login;
 
 import lombok.Data;
-import lombok.Singular;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import java.util.List;
-import java.util.Map;
 
 @Data
-public class JoinForm {
-
+public class SocialJoinForm{
     @Email(message = "{login.email.wrong}")
     @NotEmpty(message = "{login.email.null}")
     String email;
-
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,20}$", message = "{Login.email.join.wrong}")
-    String password;
-    String password2;
 
     @NotEmpty(message = "{NotEmpty.name}")
     String name;
@@ -26,7 +21,4 @@ public class JoinForm {
 
     List<Integer> required;
     List<Integer> option;
-
-
-
 }

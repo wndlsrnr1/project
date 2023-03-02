@@ -1,6 +1,8 @@
 package com.yet.project.repository.dao.user;
 
+import com.yet.project.domain.user.UserKakao;
 import com.yet.project.domain.user.User;
+import com.yet.project.domain.user.UserSocialLogin;
 import com.yet.project.repository.mybatismapper.user.UserMapper;
 import com.yet.project.web.dto.login.Agreement;
 import com.yet.project.web.dto.login.UserConsent;
@@ -19,56 +21,45 @@ public class UserDaoImplMB implements UserDao {
     private final UserMapper userMapper;
 
     @Override
-    public User getUserById(Long id) {
-        return userMapper.findById(id);
+    public User findUserById(Long id) {
+        return userMapper.selectUserByUid(id);
     }
 
     @Override
     public User findUserByEmail(String email) {
-        return userMapper.findByEmail(email);
+        return userMapper.selectUserByEmail(email);
     }
 
     @Override
-    public Map<Integer, Agreement> getRequiredAgreements() {
-        return userMapper.findRequiredAgreement();
+    public Map<Integer, Agreement> findAgreementRequiredMap() {
+        return userMapper.selectConsentOptions();
     }
 
     @Override
-    public Map<Integer, Agreement> getOptionalAgreements() {
-        return userMapper.findOptionalAgreement();
+    public Map<Integer, Agreement> findAgreementOptionMap() {
+        return userMapper.selectConsentRequireds();
     }
 
     @Override
-    public Map<Integer, Agreement> getAgreements() {
-        return userMapper.findAllAgreements();
+    public Map<Integer, Agreement> findAllAgreements() {
+        return userMapper.selectAgreements();
     }
 
     @Override
-    public List<User> findUserByPhone(String phone) {
-        return userMapper.findByPhone(phone);
+    public List<User> findUsersByPhone(String phone) {
+        return userMapper.selectUsersPhones(phone);
     }
 
     @Override
-    public Map<Integer, String> getAgreementsName() {
-        return userMapper.findAllAgreementNames();
-    }
-
-    @Override
-    public Long joinCustomerUser(User user) {
+    public Long saveUser(User user) {
         user.setAuth(2);
         Long uid = userMapper.insertUser(user);
         return uid;
     }
 
-
     @Override
-    public void saveUsersAgreements(Long uid, List<Integer> requiredIDList) {
-
-    }
-
-    @Override
-    public void saveUsersAgreementsRequired(Long uid, List<Integer> requiredIDList) {
-        Set<Integer> required = userMapper.findRequiredAgreement().keySet();
+    public void saveUserAgreementsRequired(Long uid, List<Integer> requiredIDList) {
+        Set<Integer> required = userMapper.selectConsentOptions().keySet();
         for (Integer agreementId : required) {
             UserConsent userConsent = new UserConsent();
             userConsent.setCid(agreementId);
@@ -85,7 +76,7 @@ public class UserDaoImplMB implements UserDao {
 
     @Override
     public void saveUsersAgreementsOption(Long uid, List<Integer> optionalIDList) {
-        Set<Integer> optionalSet = userMapper.findOptionalAgreement().keySet();
+        Set<Integer> optionalSet = userMapper.selectConsentRequireds().keySet();
         for (Integer agreementId : optionalSet) {
             UserConsent userConsent = new UserConsent();
             userConsent.setCid(agreementId);
@@ -101,9 +92,23 @@ public class UserDaoImplMB implements UserDao {
     }
 
     @Override
-    public void deleteUserById(Long uid) {
+    public void removeUserById(Long uid) {
         userMapper.deleteUserById(uid);
     }
 
+    @Override
+    public UserKakao findUserByKakaoId(Long kakaoId) {
+        return userMapper.selectKakaoUserByKakaoId(kakaoId);
+    }
+
+    @Override
+    public void saveUserBySocialLogin(UserSocialLogin userSocialLogin) {
+        userMapper.insertUserSocialLogin(userSocialLogin);
+    }
+
+    @Override
+    public void saveUserByKakao(UserKakao userKakao) {
+        userMapper.insertUserKakao(userKakao);
+    }
 
 }

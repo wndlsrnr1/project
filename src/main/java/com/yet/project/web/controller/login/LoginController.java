@@ -1,28 +1,19 @@
 package com.yet.project.web.controller.login;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.yet.project.domain.user.User;
 import com.yet.project.repository.dao.user.UserDao;
-import com.yet.project.web.dto.login.Agreement;
-import com.yet.project.web.dto.login.JoinForm;
-import com.yet.project.web.dto.login.LoginForm;
-import com.yet.project.web.dto.login.UnregisterForm;
+import com.yet.project.web.dto.login.*;
 import com.yet.project.web.service.login.LoginAuth;
-import com.yet.project.web.service.login.LoginService;
 import com.yet.project.web.service.user.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.manager.util.SessionUtils;
-import org.springframework.boot.web.servlet.server.Session;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
@@ -37,14 +28,20 @@ public class LoginController {
     private final LoginAuth loginAuth;
     private final UserService userService;
 
+    private final static String CLIENT_ID = "4a78e4143def6e8bbbc876055b65676d";
+    private final static String REDIRECT_URI = "http://localhost:8080/login/auth/kakao";
+    private final static String APP_ADMIN = "99827a82a26373a3a8b1008bdb062d5a";
+    private final static String SOCIAL_KAKAO = "kakao";
+
+
     @ModelAttribute("required")
     public Map<Integer, Agreement> requiredAgreements() {
-        return userDao.getRequiredAgreements();
+        return userDao.findAgreementRequiredMap();
     }
 
     @ModelAttribute("option")
     public Map<Integer, Agreement> optionAgreements() {
-        return userDao.getOptionalAgreements();
+        return userDao.findAgreementOptionMap();
     }
 
     @GetMapping
@@ -97,12 +94,12 @@ public class LoginController {
     }
 
     @GetMapping("/join")
-    public String viewJoin(@ModelAttribute("join") JoinForm joinForm, Model model) {
+    public String viewJoin(@ModelAttribute("join") BasicJoinForm basicJoinForm, Model model) {
         return "/login/join";
     }
 
     @PostMapping("/join")
-    public String joinUser(@Validated @ModelAttribute("join") JoinForm join, BindingResult bindingResult, Model model) {
+    public String joinUser(@Validated @ModelAttribute("join") BasicJoinForm join, BindingResult bindingResult, Model model) {
         log.info("join {}", join);
         if (bindingResult.hasErrors()) {
             log.info("bindingResult = {}", bindingResult);
@@ -116,7 +113,7 @@ public class LoginController {
             return "/login/join";
         }
 
-        List<User> userByPhone = userDao.findUserByPhone(join.getPhone());
+        List<User> userByPhone = userDao.findUsersByPhone(join.getPhone());
         if (userByPhone.size() != 0) {
             bindingResult.rejectValue("phone", "Login");
             log.info("bindingResult = {}", bindingResult);
@@ -152,12 +149,12 @@ public class LoginController {
     //uid 변수화 하기
     @GetMapping("/unregister")
     public String unregister(@ModelAttribute("unregisterForm") UnregisterForm unregisterForm, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
-        if (session == null || uid == null ) {
+        if (session == null || uid == null) {
             return "redirect:/";
         }
 
         User basicUserInfo = new User();
-        User userById = userDao.getUserById(uid);
+        User userById = userDao.findUserById(uid);
         basicUserInfo.setName(userById.getName());
         basicUserInfo.setEmail(userById.getEmail());
         log.info("userById.getEmail() = {}", userById.getEmail());
@@ -166,14 +163,15 @@ public class LoginController {
         return "/login/unregister";
     }
 
+
     @PostMapping("/unregister")
     public String sendUnregister(@Validated @ModelAttribute("unregisterForm") UnregisterForm unregisterForm, BindingResult bindingResult, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
-        if (session == null || uid == null ) {
+        if (session == null || uid == null) {
             return "redirect:/";
         }
 
         //삭제하고자 하는 email과 지금 세션에 등록된 uid로 조회된 id가 다르면 거절
-        User userById = userDao.getUserById(uid);
+        User userById = userDao.findUserById(uid);
         String userPassword = userById.getPassword();
 
         User basicUserInfo = new User();
@@ -209,6 +207,54 @@ public class LoginController {
         }
 
 
+        User unregisterUser = new User();
+        unregisterUser.setUid(uid);
+
+        userService.unregisterUser(unregisterUser);
+        session.invalidate();
+        return "redirect:/";
+    }
+
+    @GetMapping("/unregister/kakao")
+    public String unregisterKakao(@ModelAttribute("unregisterForm") UnregisterFormKakao unregisterForm, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
+        if (session == null || uid == null) {
+            return "redirect:/";
+        }
+
+        User basicUserInfo = new User();
+        User userById = userDao.findUserById(uid);
+        basicUserInfo.setName(userById.getName());
+        basicUserInfo.setEmail(userById.getEmail());
+        log.info("userById.getEmail() = {}", userById.getEmail());
+        model.addAttribute("basicUserInfo", basicUserInfo);
+
+        return "/login/unregister_kakao";
+    }
+
+    @PostMapping("/unregister/kakao")
+    public String sendUnregisterKakao(@Validated @ModelAttribute("unregisterForm") UnregisterFormKakao unregisterForm, BindingResult bindingResult, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
+        if (session == null || uid == null) {
+            return "redirect:/";
+        }
+
+        //삭제하고자 하는 email과 지금 세션에 등록된 uid로 조회된 id가 다르면 거절
+        User userById = userDao.findUserById(uid);
+        User basicUserInfo = new User();
+        basicUserInfo.setName(userById.getName());
+        basicUserInfo.setEmail(userById.getEmail());
+
+        model.addAttribute("basicUserInfo", basicUserInfo);
+
+        if (bindingResult.hasErrors()) {
+            return "/login/unregister";
+        }
+
+        Boolean consent = unregisterForm.getConsent();
+        if (consent == null || !consent) {
+            bindingResult.rejectValue("consent", "unregister", "필수 항목에 동의해주셔야 합니다");
+            log.info("동의 없음 오류");
+            return "/login/unregister";
+        }
 
         User unregisterUser = new User();
         unregisterUser.setUid(uid);
@@ -218,6 +264,158 @@ public class LoginController {
         return "redirect:/";
     }
 
+
+    //"https://kauth.kakao.com/oauth/authorize?client_id=4a78e4143def6e8bbbc876055b65676d&redirect_uri=http://localhost:8080/login/kakao&response_type=code"
+    @GetMapping("/kakao")
+    public String viewLoginKakako() {
+        return "redirect:https://kauth.kakao.com/oauth/authorize?client_id=" + CLIENT_ID + "&redirect_uri=" + REDIRECT_URI + "&response_type=code&scope=account_email,openid";
+    }
+
+    //카카오에서 코드 받기 코드 받기
+    @GetMapping("/auth/kakao")
+    public String kakaoAuth(
+        @RequestParam(required = false) String code,
+        @RequestParam(required = false) String state,
+        @RequestParam(required = false) String error,
+        @RequestParam(required = false) String error_description,
+        RedirectAttributes redirectAttributes,
+        HttpSession session
+
+    ) {
+
+        if (error != null) {
+            return "/login/login";
+        }
+
+        Map<String, String> accessTokenMap = null;
+        //액세스 토큰 정보 받아오기
+        try {
+            //keys = {id_token, token_type, access_token, expires_in};
+            accessTokenMap = userService.getAccessToken(code, CLIENT_ID, REDIRECT_URI);
+            if (accessTokenMap == null) {
+                log.info("액세스 토큰 얻어오기 실패");
+                return "/login/login";
+            }
+
+        } catch (JsonProcessingException e) {
+            //예외처리하기
+            log.info("errors in accessToken", e);
+            return "/login/login";
+        }
+
+        Map<String, String> userInfoMap = null;
+        try {
+            String accessToken = accessTokenMap.get("access_token");
+
+            /*
+            key and value example =
+            {
+            email_needs_agreement=false,
+            is_email_valid=true,
+            is_email_verified=true,
+            id=2684628534,
+            connected_at="2023-02-27T13:31:31Z",
+            has_email=true,
+            email="wndlsrnr1@naver.com"
+            }
+             */
+
+            userInfoMap = userService.getUserInfo(accessToken);
+            if (userInfoMap == null) {
+                log.info("유저 정보 얻어오기 실패");
+                return "/login/login";
+            }
+            log.info("userInfoMap {}", userInfoMap);
+        } catch (JsonProcessingException e) {
+            return "/login/login";
+        }
+
+        Long kakaoId = Long.parseLong(userInfoMap.get("id"));
+        String email = userInfoMap.get("email");
+
+        User user = userService.findUserKakao(kakaoId);
+
+        if (user == null) {
+            log.info("null 이어야 함");
+            session.setAttribute("type", SOCIAL_KAKAO);
+            session.setAttribute("kakao_id", kakaoId);
+            session.setAttribute("email", email);
+            return "redirect:/login/join/social/kakao";
+        }
+
+        session.setAttribute("uid", user.getUid());
+        log.info("uid {}", session.getAttribute("uid"));
+        return "redirect:/";
+    }
+
+    @GetMapping("/join/social/{socialName}")
+    public String joinBySocial(
+        @PathVariable("socialName") String socialName,
+        HttpSession session,
+        @ModelAttribute("join") SocialJoinForm socialJoinForm
+    ) {
+
+        String uid = (String) session.getAttribute("uid");
+        if (uid != null) {
+            return "redirect:/login";
+        }
+
+        if (socialName.equals(SOCIAL_KAKAO)) {
+            return "/login/kakaojoin";
+        }
+        return "redirect:/";
+    }
+
+
+    @PostMapping("/join/social/{socialName}")
+    public String joinBySocial(
+        @PathVariable("socialName") String socialName,
+        @Validated @ModelAttribute("join") SocialJoinForm socialJoinForm,
+        BindingResult bindingResult,
+        @SessionAttribute("type") String typeStr,
+        @SessionAttribute("kakao_id") String kakaoId,
+        @SessionAttribute("email") String email,
+        HttpSession session,
+        Model model
+    ) {
+
+        if (socialName.equals("kakao")) {
+            if (bindingResult.hasErrors()) {
+                return "/login/kakaojoin";
+            }
+
+            socialJoinForm.getPhone();
+            socialJoinForm.getEmail();
+            User userByEmail = userDao.findUserByEmail(socialJoinForm.getEmail());
+            if (userByEmail != null) {
+                bindingResult.rejectValue("email", "Login");
+                log.info("bindingResult = {}", bindingResult);
+                return "/login/kakaojoin";
+            }
+
+            List<User> userByPhone = userDao.findUsersByPhone(socialJoinForm.getPhone());
+            if (userByPhone.size() != 0) {
+                bindingResult.rejectValue("phone", "Login");
+                log.info("bindingResult = {}", bindingResult);
+                return "/login/kakaojoin";
+            }
+
+            Map<Integer, Agreement> required = (Map<Integer, Agreement>) model.getAttribute("required");
+            if (!socialJoinForm.getRequired().containsAll(required.keySet())) {
+                bindingResult.rejectValue("required", "NotFull");
+                return "/login/kakaojoin";
+            }
+
+            //모두 성공했을때
+            userService.userJoinByKakao(socialJoinForm, kakaoId, typeStr);
+            Long kakaoIdLong = Long.parseLong(kakaoId);
+            User userKakao = userService.findUserKakao(kakaoIdLong);
+            session.setAttribute("uid", userKakao.getUid());
+            return "redirect:/";
+        }
+
+        return "redirect:/";
+    }
 
 
 }

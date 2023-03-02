@@ -1,33 +1,37 @@
 package com.yet.project.repository.dao.user;
 
+import com.yet.project.domain.user.UserKakao;
 import com.yet.project.domain.user.User;
+import com.yet.project.domain.user.UserSocialLogin;
 import com.yet.project.web.dto.login.Agreement;
 
 import java.util.List;
 import java.util.Map;
 
 public interface UserDao {
-    User getUserById(Long id);
+    User findUserById(Long id);
 
     User findUserByEmail(String email);
 
-    Map<Integer, Agreement> getRequiredAgreements();
+    Map<Integer, Agreement> findAgreementRequiredMap();
 
-    Map<Integer, Agreement> getOptionalAgreements();
+    Map<Integer, Agreement> findAgreementOptionMap();
 
-    Map<Integer, Agreement> getAgreements();
+    Map<Integer, Agreement> findAllAgreements();
 
-    List<User> findUserByPhone(String phone);
+    List<User> findUsersByPhone(String phone);
 
-    Map<Integer, String> getAgreementsName();
+    Long saveUser(User user);
 
-    Long joinCustomerUser(User user);
-
-    void saveUsersAgreements(Long uid, List<Integer> requiredIDList);
-
-    void saveUsersAgreementsRequired(Long uid, List<Integer> requiredIDList);
+    void saveUserAgreementsRequired(Long uid, List<Integer> requiredIDList);
 
     void saveUsersAgreementsOption(Long uid, List<Integer> requiredIDList);
 
-    void deleteUserById(Long uid);
+    void removeUserById(Long uid);
+
+    UserKakao findUserByKakaoId(Long kakaoId);
+
+    void saveUserBySocialLogin(UserSocialLogin userSocialLogin);
+
+    void saveUserByKakao(UserKakao userKakao);
 }
