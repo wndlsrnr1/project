@@ -25,9 +25,8 @@ public class AppConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new LoginInterceptor())
             .order(1)
-            .addPathPatterns("/**")
+            .addPathPatterns("/admin/**")
             .excludePathPatterns("/css/**", "/*.ico", "/error", "/bootstrap/**", "/images/**", "/login/**", "/");
-
     }
 
     @Override
