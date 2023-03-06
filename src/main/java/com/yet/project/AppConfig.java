@@ -16,11 +16,6 @@ import java.util.List;
 public class AppConfig implements WebMvcConfigurer {
 
     @Bean
-    ObjectMapper objectMapper() {
-        return new ObjectMapper();
-    }
-
-    @Bean
     RestTemplate restTemplate() {
         return new RestTemplate();
     }
