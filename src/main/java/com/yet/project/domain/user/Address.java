@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 public class Address {
     Long uid;
     String country;
-    String _do;
+    String du;
     String si;
     String streetAddress;
     String details;
