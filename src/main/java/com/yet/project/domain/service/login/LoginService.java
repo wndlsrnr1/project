@@ -1,4 +1,4 @@
-package com.yet.project.web.service.login;
+package com.yet.project.domain.service.login;
 
 import com.yet.project.domain.user.User;
 import com.yet.project.repository.dao.user.UserDao;

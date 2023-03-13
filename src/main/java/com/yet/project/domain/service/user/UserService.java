@@ -1,13 +1,13 @@
-package com.yet.project.web.service.user;
+package com.yet.project.domain.service.user;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yet.project.domain.service.login.LoginAuth;
 import com.yet.project.domain.user.UserKakao;
 import com.yet.project.domain.user.User;
 import com.yet.project.domain.user.UserSocialLogin;
 import com.yet.project.repository.dao.user.UserDao;
 import com.yet.project.web.dto.login.*;
-import com.yet.project.web.service.login.LoginAuth;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;

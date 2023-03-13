@@ -1,4 +1,4 @@
-package com.yet.project.web.service.login;
+package com.yet.project.domain.service.login;
 
 public interface PasswordUtils {
     String encode(String password);
