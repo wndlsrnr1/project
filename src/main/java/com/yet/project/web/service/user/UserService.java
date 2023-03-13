@@ -73,16 +73,14 @@ public class UserService {
         });
 
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        ResponseEntity<AccessToken> responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, AccessToken.class);
 
         //상태 값 마다 처리하기
         if (responseEntity == null || responseEntity.getStatusCode() != HttpStatus.OK) {
             return null;
         }
 
-        String body = responseEntity.getBody();
-        JsonNode jsonNode = objectMapper.readTree(body);
-        AccessToken accessToken = objectMapper.treeToValue(jsonNode, AccessToken.class);
+        AccessToken accessToken = responseEntity.getBody();
         return accessToken;
     }
 
@@ -91,15 +89,14 @@ public class UserService {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
 
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(headers), String.class);
+        ResponseEntity<KaKaoUserInfo> response = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(headers), KaKaoUserInfo.class);
 
         //상태값마다 다르게 처리하기
         if (response.getStatusCode() != HttpStatus.OK) {
             return null;
         }
 
-        JsonNode jsonNode = objectMapper.readTree(response.getBody());
-        KaKaoUserInfo kaKaoUserInfo = objectMapper.treeToValue(jsonNode, KaKaoUserInfo.class);
+        KaKaoUserInfo kaKaoUserInfo = response.getBody();
         return kaKaoUserInfo;
     }
 
