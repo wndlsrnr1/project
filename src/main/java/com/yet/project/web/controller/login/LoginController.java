@@ -295,6 +295,9 @@ public class LoginController {
 
         } catch (JsonProcessingException e) {
             //예외처리하기
+            log.info("errors in JsonProcessing Exception accessToken", e);
+            return "/login/login";
+        } catch (Exception e) {
             log.info("errors in accessToken", e);
             return "/login/login";
         }
@@ -309,6 +312,8 @@ public class LoginController {
                 return "/login/login";
             }
         } catch (JsonProcessingException e) {
+            return "/login/login";
+        } catch (Exception e) {
             return "/login/login";
         }
 
