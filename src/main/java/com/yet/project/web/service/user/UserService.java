@@ -1,16 +1,15 @@
 package com.yet.project.web.service.user;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yet.project.domain.user.UserKakao;
 import com.yet.project.domain.user.User;
 import com.yet.project.domain.user.UserSocialLogin;
 import com.yet.project.repository.dao.user.UserDao;
 import com.yet.project.web.dto.login.*;
+import com.yet.project.web.service.login.LoginAuth;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -29,6 +28,7 @@ public class UserService {
     private final UserDao userDao;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final LoginAuth loginAuth;
 
     public void userJoin(BasicJoinForm join) {
         User user = new User();
@@ -140,5 +140,13 @@ public class UserService {
         userKakao.setKakaoId(kakaoIdLong);
         userDao.saveUserByKakao(userKakao);
 
+    }
+
+    public User getUserInDbByForm(LoginForm loginForm) {
+        LoginForm form = new LoginForm();
+        form.setEmail(loginForm.getEmail());
+        form.setPassword(loginForm.getPassword());
+        User user = loginAuth.authUserByLoginForm(form);
+        return user;
     }
 }

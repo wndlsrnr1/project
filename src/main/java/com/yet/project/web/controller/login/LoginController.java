@@ -59,16 +59,13 @@ public class LoginController {
         if (bindingResult.hasErrors()) {
             return "/login/login";
         }
+
         //이미 로그인된 상태
         if (session.getAttribute("uid") != null) {
             return "redirect:/";
         }
 
-        LoginForm form = new LoginForm();
-        form.setEmail(loginForm.getEmail());
-        form.setPassword(loginForm.getPassword());
-        User user = loginAuth.authUserByLoginForm(form);
-
+        User user = userService.getUserInDbByForm(loginForm);
         //비밀번호가 다름
         if (user == null) {
             bindingResult.rejectValue("password", "Login");
@@ -79,11 +76,11 @@ public class LoginController {
         if (user != null) {
             session.setAttribute("uid", user.getUid());
         }
-
-
         //성공
         return "redirect:/";
     }
+
+
 
     @GetMapping("/logout")
     public String logout(@SessionAttribute("uid") String uid, HttpSession session) {
