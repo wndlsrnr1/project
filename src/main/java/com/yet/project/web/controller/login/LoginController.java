@@ -277,22 +277,20 @@ public class LoginController {
         @RequestParam(required = false) String code,
         @RequestParam(required = false) String state,
         @RequestParam(required = false) String error,
-        @RequestParam(required = false) String error_description,
+        @RequestParam(name = "error_description", required = false) String errorDescription,
         RedirectAttributes redirectAttributes,
         HttpSession session
-
     ) {
 
         if (error != null) {
             return "/login/login";
         }
 
-        Map<String, String> accessTokenMap = null;
+        AccessToken accessToken = null;
         //액세스 토큰 정보 받아오기
         try {
-            //keys = {id_token, token_type, access_token, expires_in};
-            accessTokenMap = userService.getAccessToken(code, CLIENT_ID, REDIRECT_URI);
-            if (accessTokenMap == null) {
+            accessToken = userService.getAccessToken(code, CLIENT_ID, REDIRECT_URI);
+            if (accessToken == null) {
                 log.info("액세스 토큰 얻어오기 실패");
                 return "/login/login";
             }
@@ -303,36 +301,21 @@ public class LoginController {
             return "/login/login";
         }
 
-        Map<String, String> userInfoMap = null;
+        KaKaoUserInfo kakaoUserInfo = null;
+
         try {
-            String accessToken = accessTokenMap.get("access_token");
-
-            /*
-            key and value example =
-            {
-            email_needs_agreement=false,
-            is_email_valid=true,
-            is_email_verified=true,
-            id=2684628534,
-            connected_at="2023-02-27T13:31:31Z",
-            has_email=true,
-            email="wndlsrnr1@naver.com"
-            }
-             */
-
-            userInfoMap = userService.getUserInfo(accessToken);
-            if (userInfoMap == null) {
+            String accessTokenStr = accessToken.getAccessToken();
+            kakaoUserInfo = userService.getUserInfo(accessTokenStr);
+            if (kakaoUserInfo == null) {
                 log.info("유저 정보 얻어오기 실패");
                 return "/login/login";
             }
-            log.info("userInfoMap {}", userInfoMap);
         } catch (JsonProcessingException e) {
             return "/login/login";
         }
 
-        Long kakaoId = Long.parseLong(userInfoMap.get("id"));
-        String email = userInfoMap.get("email");
-
+        Long kakaoId = kakaoUserInfo.getId();
+        String email = kakaoUserInfo.getKakaoAccount().getEmail();
         User user = userService.findUserKakao(kakaoId);
 
         if (user == null) {

@@ -7,10 +7,10 @@ import com.yet.project.domain.user.UserKakao;
 import com.yet.project.domain.user.User;
 import com.yet.project.domain.user.UserSocialLogin;
 import com.yet.project.repository.dao.user.UserDao;
-import com.yet.project.web.dto.login.BasicJoinForm;
-import com.yet.project.web.dto.login.SocialJoinForm;
+import com.yet.project.web.dto.login.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -54,21 +54,25 @@ public class UserService {
         userDao.removeUserById(uid);
     }
 
-    public Map<String, String> getAccessToken(String code, String clint_id, String redirect_uri) throws JsonProcessingException {
+    public AccessToken getAccessToken(String code, String clientId, String redirectUri) throws JsonProcessingException {
         //token 받아 오기
         Map<String, String> result = new HashMap<>();
         String url = "https://kauth.kakao.com/oauth/token";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
+        //body 값 넣기
         MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("grant_type", "authorization_code");
-        requestBody.add("client_id", clint_id);
-        requestBody.add("redirect_uri", redirect_uri);
-        requestBody.add("code", code);
+        AuthorizationCode authorizationCode = new AuthorizationCode();
+        authorizationCode.setClientId(clientId);
+        authorizationCode.setRedirectUri(redirectUri);
+        authorizationCode.setCode(code);
+        String authorizationCodeStr = objectMapper.writeValueAsString(authorizationCode);
+        objectMapper.readValue(authorizationCodeStr, Map.class).forEach((key, value) -> {
+            requestBody.add(key.toString(), value.toString());
+        });
 
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
-
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
 
         //상태 값 마다 처리하기
@@ -78,29 +82,15 @@ public class UserService {
 
         String body = responseEntity.getBody();
         JsonNode jsonNode = objectMapper.readTree(body);
-        jsonNode.fieldNames().forEachRemaining(key -> result.put(key, jsonNode.get(key).toString()));
-        return result;
+        AccessToken accessToken = objectMapper.treeToValue(jsonNode, AccessToken.class);
+        return accessToken;
     }
 
-    /**
-     *
-     * @param accessToken
-     * @return Map
-     * @throws JsonProcessingException
-     * keys =
-     * email_needs_agreement,
-     * is_email_valid,
-     * is_email_verified,
-     * id, connected_at,
-     * has_email,
-     * email
-     */
-    public Map<String, String> getUserInfo(String accessToken) throws JsonProcessingException {
-        Map<String, String> result = new HashMap<>();
-
+    public KaKaoUserInfo getUserInfo(String accessToken) throws JsonProcessingException {
         String url = "https://kapi.kakao.com/v2/user/me";
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
+
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(headers), String.class);
 
         //상태값마다 다르게 처리하기
@@ -109,11 +99,8 @@ public class UserService {
         }
 
         JsonNode jsonNode = objectMapper.readTree(response.getBody());
-        jsonNode.fieldNames().forEachRemaining(key -> result.put(key, jsonNode.get(key).toString()));
-        JsonNode jsonNode1 = objectMapper.readTree(result.get("kakao_account"));
-        jsonNode1.fieldNames().forEachRemaining(key -> result.put(key, jsonNode1.get(key).toString()));
-        result.remove("kakao_account");
-        return result;
+        KaKaoUserInfo kaKaoUserInfo = objectMapper.treeToValue(jsonNode, KaKaoUserInfo.class);
+        return kaKaoUserInfo;
     }
 
     public User findUserKakao(Long kakaoId) {
