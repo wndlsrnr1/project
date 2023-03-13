@@ -46,7 +46,7 @@ public class LoginController {
     }
 
     @GetMapping
-    public String viewLoginPage(@ModelAttribute("loginForm") LoginForm loginForm, HttpSession session) {
+    public String loginRequest(@ModelAttribute("loginForm") LoginForm loginForm, HttpSession session) {
         if (session.getAttribute("uid") != null) {
             return "redirect:/";
         }
@@ -54,7 +54,7 @@ public class LoginController {
     }
 
     @PostMapping
-    public String authLogin(@Validated @ModelAttribute("loginForm") LoginForm loginForm, BindingResult bindingResult, HttpSession session) {
+    public String authLoginRequest(@Validated @ModelAttribute("loginForm") LoginForm loginForm, BindingResult bindingResult, HttpSession session) {
         log.info("loginForm = {}", loginForm);
         //바인딩 실패
         if (bindingResult.hasErrors()) {
@@ -84,7 +84,7 @@ public class LoginController {
 
 
     @GetMapping("/logout")
-    public String logout(@SessionAttribute("uid") String uid, HttpSession session) {
+    public String logoutRequest(@SessionAttribute("uid") String uid, HttpSession session) {
         if (session != null && uid != null) {
             session.invalidate();
         }
@@ -92,12 +92,12 @@ public class LoginController {
     }
 
     @GetMapping("/join")
-    public String viewJoin(@ModelAttribute("join") BasicJoinForm basicJoinForm, Model model) {
+    public String joinFormRequest(@ModelAttribute("join") BasicJoinForm basicJoinForm, Model model) {
         return "/login/join";
     }
 
     @PostMapping("/join")
-    public String joinUser(@Validated @ModelAttribute("join") BasicJoinForm join, BindingResult bindingResult, Model model) {
+    public String joinUserRequest(@Validated @ModelAttribute("join") BasicJoinForm join, BindingResult bindingResult, Model model) {
         log.info("join {}", join);
         if (bindingResult.hasErrors()) {
             log.info("bindingResult = {}", bindingResult);
@@ -146,7 +146,7 @@ public class LoginController {
 
     //uid 변수화 하기
     @GetMapping("/unregister")
-    public String unregister(@ModelAttribute("unregisterForm") UnregisterForm unregisterForm, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
+    public String unregisterFormRequest(@ModelAttribute("unregisterForm") UnregisterForm unregisterForm, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
         if (session == null || uid == null) {
             return "redirect:/";
         }
@@ -163,7 +163,7 @@ public class LoginController {
 
 
     @PostMapping("/unregister")
-    public String sendUnregister(@Validated @ModelAttribute("unregisterForm") UnregisterForm unregisterForm, BindingResult bindingResult, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
+    public String sendUnregisterRequest(@Validated @ModelAttribute("unregisterForm") UnregisterForm unregisterForm, BindingResult bindingResult, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
         if (session == null || uid == null) {
             return "redirect:/";
         }
@@ -214,7 +214,7 @@ public class LoginController {
     }
 
     @GetMapping("/unregister/kakao")
-    public String unregisterKakao(@ModelAttribute("unregisterForm") UnregisterFormKakao unregisterForm, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
+    public String unregisterKakaoRequest(@ModelAttribute("unregisterForm") UnregisterFormKakao unregisterForm, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
         if (session == null || uid == null) {
             return "redirect:/";
         }
@@ -230,7 +230,7 @@ public class LoginController {
     }
 
     @PostMapping("/unregister/kakao")
-    public String sendUnregisterKakao(@Validated @ModelAttribute("unregisterForm") UnregisterFormKakao unregisterForm, BindingResult bindingResult, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
+    public String sendUnregisterKakaoRequest(@Validated @ModelAttribute("unregisterForm") UnregisterFormKakao unregisterForm, BindingResult bindingResult, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
         if (session == null || uid == null) {
             return "redirect:/";
         }
@@ -265,13 +265,13 @@ public class LoginController {
 
     //"https://kauth.kakao.com/oauth/authorize?client_id=4a78e4143def6e8bbbc876055b65676d&redirect_uri=http://localhost:8080/login/kakao&response_type=code"
     @GetMapping("/kakao")
-    public String viewLoginKakako() {
+    public String loginKakakoViewRequest() {
         return "redirect:https://kauth.kakao.com/oauth/authorize?client_id=" + CLIENT_ID + "&redirect_uri=" + REDIRECT_URI + "&response_type=code&scope=account_email,openid";
     }
 
     //카카오에서 코드 받기 코드 받기
     @GetMapping("/auth/kakao")
-    public String kakaoAuth(
+    public String kakaoAuthRequest(
         @RequestParam(required = false) String code,
         @RequestParam(required = false) String state,
         @RequestParam(required = false) String error,
@@ -334,8 +334,9 @@ public class LoginController {
         return "redirect:/";
     }
 
+
     @GetMapping("/join/social/{socialName}")
-    public String joinBySocial(
+    public String joinBySocialViewRequest(
         @PathVariable("socialName") String socialName,
         HttpSession session,
         @ModelAttribute("join") SocialJoinForm socialJoinForm
@@ -354,7 +355,7 @@ public class LoginController {
 
 
     @PostMapping("/join/social/{socialName}")
-    public String joinBySocial(
+    public String joinBySocialSendRequest(
         @PathVariable("socialName") SocialName socialName,
         @Validated @ModelAttribute("join") SocialJoinForm socialJoinForm,
         BindingResult bindingResult,
