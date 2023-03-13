@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class SocialLogin {
-    Long socialId;
+    Integer socialId;
     String name;
     String nameKor;
 }
