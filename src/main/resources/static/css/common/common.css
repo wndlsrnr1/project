@@ -1,0 +1,28 @@
+.h-50px {
+    height: 50px;
+}
+.color-kakao {
+    color: #000000;
+    background-color: #fae100;
+}
+.color-google {
+    color: #000000;
+    background-color: white;
+}
+.color-naver {
+    color: #000000;
+    background-color: #19ce60;
+}
+.color-apple {
+    color: #000000;
+    background-color: white;
+}
+.login-error {
+    color: #e52528;
+    margin: 9px 12px 0;
+    font-size: 12px;
+    line-height: 18px;
+    cursor: default;
+    padding: 0;
+    text-align: right;
+}
