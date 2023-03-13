@@ -5,6 +5,7 @@ import com.yet.project.repository.dao.user.UserDao;
 import com.yet.project.web.dto.login.*;
 import com.yet.project.domain.service.login.LoginAuth;
 import com.yet.project.domain.service.user.UserService;
+import com.yet.project.web.enums.user.SocialName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -349,7 +350,7 @@ public class LoginController {
 
     @PostMapping("/join/social/{socialName}")
     public String joinBySocial(
-        @PathVariable("socialName") String socialName,
+        @PathVariable("socialName") SocialName socialName,
         @Validated @ModelAttribute("join") SocialJoinForm socialJoinForm,
         BindingResult bindingResult,
         @SessionAttribute("type") String typeStr,
@@ -359,7 +360,7 @@ public class LoginController {
         Model model
     ) {
 
-        if (socialName.equals("kakao")) {
+        if (socialName.equals(SocialName.KAKAO)) {
             if (bindingResult.hasErrors()) {
                 return "/login/kakaojoin";
             }
@@ -367,6 +368,7 @@ public class LoginController {
             socialJoinForm.getPhone();
             socialJoinForm.getEmail();
             User userByEmail = userDao.findUserByEmail(socialJoinForm.getEmail());
+
             if (userByEmail != null) {
                 bindingResult.rejectValue("email", "Login");
                 log.info("bindingResult = {}", bindingResult);
