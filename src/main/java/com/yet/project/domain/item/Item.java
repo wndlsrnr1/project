@@ -9,9 +9,4 @@ public class Item {
     String nameKor;
     Long quantity;
     Long price;
-
-//
-    String open;
-    String regions;
-    String deliveryCode;
 }

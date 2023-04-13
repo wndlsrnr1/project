@@ -7,4 +7,12 @@ public class Brand {
     Long id;
     String name;
     String nameKor;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

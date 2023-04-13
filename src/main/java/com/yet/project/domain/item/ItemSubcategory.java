@@ -1,6 +1,9 @@
 package com.yet.project.domain.item;
 
+import lombok.Data;
+
+@Data
 public class ItemSubcategory {
     Long itemId;
-    Integer subcategoryId;
+    Long subcategoryId;
 }

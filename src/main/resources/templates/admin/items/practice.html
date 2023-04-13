@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>카테고리 관리</title>
+</head>
+<body>
+  <div class="container w-100">
+    <h2 class="text-center mb-lg-5 mt-lg-5">브랜드 & 카테고리 관리</h2>
+    <div class="row">
+      <div class="col text-center h-100">
+        <h4>브랜드 관리</h4>
+
+        <div class="list-group brand">
+          <div class="d-flex mb-1" th:each="b : ${brandList}">
+            <button class="list-group-item list-group-item-action me-1 rounded-3"
+                    aria-current="true" type="button"
+                    th:attr_id="${b.getId()}"
+                    th:text="${b.getNameKor()} + '(' + ${b.getName()} + ')'">
+              버튼 어쩌고
+            </button>
+          </div>
+
+          <form th:action="@{manage/brand/remove}" method="post" class="brand_delete-form">
+            <input type="hidden" th:value="${b.getId()}" th:name="id"/>
+            <button type="submit" class="btn btn-secondary me-1" style="width: 55px">삭제</button>
+          </form>
+
+        </div>
+<!--        한줄 끝-->
+
+
+
+        <form th:action="@{manage/brand/add}" method="post" th:object="${brand}">
+          <div class="d-flex mb-1">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">영어</span>
+              <input th:field="*{name}" type="text" class="form-control me-1" aria-label="sizing example input" placeholder="영어 이름">
+            </div>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">Kor</span>
+              <input th:field="nameKor" type="text" class="form-control" aria-label="sizing example input" placeholder="한글 이름"/>
+            </div>
+          </div>
+        </form>
+
+        <form action="" class="brand_update" th:action="@{manage/brand/update}" method="post" th:object="${brand}">
+          <div class="d-flex m-1">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">Eng</span>
+              <input type="text" th:field="*{name}" class="form-control me-1" aria-label="sizing example input" placeholder="영어이름">
+            </div>
+
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">Kor</span>
+              <input type="text" class="form-control" aria-label="Sizing example input" placeholder="한글 이름" th:field="*{nameKor}">
+            </div>
+
+            <button type="submit" class="btn btn-secondary" style="width: 100px">추가</button>
+          </div>
+        </form>
+
+        <form action="" class="brand_update" method="post" th:object="${brand}" th:action="@{manage/brand/update}">
+          <div class="d-flex mb-1">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">Eng</span>
+              <input type="text" th:field="*{name}" aria-label="sizing example input" class="form-control me-1"
+                     placeholder="영어 이름"/>
+            </div>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">Kor</span>
+              <input type="text" th:field="*{nameKor}" class="form-control me-1" aria-label="sizing example input">
+            </div>
+            <input type="hidden" th:field="*{id}" name="id" class="brand_input">
+            <button type="submit" class="btn btn-secondary" style="width: 100px">수정</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+</body>
+
+<script>
+
+</script>
+</html>

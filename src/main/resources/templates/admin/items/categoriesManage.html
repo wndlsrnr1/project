@@ -5,116 +5,279 @@
 </head>
 <body>
   <div class="container w-100">
+
     <h2 class="text-center mb-lg-5 mt-lg-5">브랜드 & 카테고리 관리</h2>
     <div class="row">
       <div class="col text-center h-100">
         <h4>브랜드 관리</h4>
-
-        <div class="list-group">
-          <div class="d-flex mb-1">
-            <button type="button" class="list-group-item list-group-item-action me-1 active rounded-3" aria-current="true">
+        <div class="list-group brand">
+          <div class="d-flex mb-1" th:each="b : ${brandList}">
+            <button th:attr_id="${b.getId()}" type="button"
+                    class="list-group-item list-group-item-action me-1  rounded-3"
+                    aria-current="true"
+                    th:text="${b.getNameKor()} + '(' + ${b.getName()} + ')'">
               소니
             </button>
-            <button type="button" class="btn btn-secondary" style="width: 75px">삭제</button>
+            <input type="hidden" th:value="${b.getId()}" th:name="id" class="brand_id">
+
+            <form th:action="@{manage/brand/remove}" method="post" class="brand_delete_form">
+              <input type="hidden" th:value="${b.getId()}" th:name="id">
+              <button type="submit" class="btn btn-secondary me-1" style="width: 55px">삭제</button>
+            </form>
           </div>
-          <div class="d-flex mb-1">
-            <button type="button" class="list-group-item list-group-item-action me-1 rounded-3" aria-current="true">
-              Xbox
-            </button>
-            <button type="button" class="btn btn-secondary" style="width: 75px">삭제</button>
-          </div>
-          <div class="d-flex mb-1">
-            <button type="button" class="list-group-item list-group-item-action me-1 rounded-3" aria-current="true">
-              닌텐도
-            </button>
-            <button type="button" class="btn btn-secondary" style="width: 75px">삭제</button>
-          </div>
-          <div class="d-flex mb-1">
-            <button type="button" class="list-group-item list-group-item-action me-1 rounded-3 disabled" aria-current="true">
-              steam
-            </button>
-            <button type="button" class="btn btn-secondary" style="width: 75px">삭제</button>
-          </div>
-          <div class="d-flex mb-1">
-            <input type="text" class="list-group-item list-group-item-action me-1 rounded-3" aria-current="true"/>
-            <button type="button" class="btn btn-secondary" style="width: 75px">추가</button>
-          </div>
-          <div class="d-flex mb-1">
-            <button type="button" class="btn btn-outline-warning list-group-item-action me-1 rounded-3 text-lg-center text-warning" aria-current="true">
-              +
-            </button>
-            <div style="width: 80px"></div>
-          </div>
+
+          <form th:action="@{manage/brand/add}" method="post" th:object="${brand}">
+            <div class="d-flex mb-1">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">Eng</span>
+                <input th:field="*{name}" type="text" class="form-control me-1" aria-label="Sizing example input"
+                       placeholder="영어 이름">
+              </div>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">Kor</span>
+                <input th:field="*{nameKor}" type="text" class="form-control" aria-label="Sizing example input"
+                       placeholder="한글 이름">
+              </div>
+              <button type="submit" class="btn btn-secondary" style="width: 100px">추가</button>
+            </div>
+          </form>
+
+          <form class="brand_update" th:action="@{manage/brand/update}" method="post" th:object="${brand}">
+            <div class="d-flex mb-1">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">Eng</span>
+                <input th:field="*{name}" type="text" class="form-control me-1" aria-label="Sizing example input"
+                       placeholder="영어 이름">
+              </div>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">Kor</span>
+                <input th:field="*{nameKor}" type="text" class="form-control me-1" aria-label="Sizing example input"
+                       placeholder="한글 이름">
+              </div>
+              <input th:field="*{id}" type="hidden" name="id" class="brand_input">
+              <button type="submit" class="btn btn-secondary" style="width: 100px">수정</button>
+            </div>
+          </form>
+
         </div>
       </div>
 
       <div class="col text-center h-100">
         <h4>카테고리 관리</h4>
+        <div class="list-group category">
+          <!--
+          <div>
+          <div>등록 지역</div>
+                <div th:each="region : ${regions}" class="form-check form-check-inline">
+                    <input type="checkbox" th:field="*{regions}" th:value="${region.key}"
+            class="form-check-input">
+                    <label th:for="${#ids.prev('regions')}"
+          th:text="${region.value}" class="form-check-label">서울</label>
+          -->
 
-        <div class="list-group">
-          <div class="d-flex mb-1">
-            <button type="button" class="list-group-item list-group-item-action me-1 active rounded-3" aria-current="true">
-              소니
-            </button>
-            <button type="button" class="btn btn-secondary" style="width: 75px">삭제</button>
+          <div th:each="cate : ${categoryList}" class="accordion" th:id="'accordion_'+${cate.getId()}">
+            <div class="mb-1 d-flex w-100">
+              <button th:attr_id="${cate.getId()}" type="button"
+                      class="list-group-item list-group-item-action me-1 rounded-3"
+                      aria-current="true" th:text="${cate.getNameKor()} +'('+${cate.getName()}+')'"
+                      th:attr="data-bs-target=(${subcategoryByCategory.get(cate.getId())} ? '#'+'category_' + ${cate.getId()} : '#category_'+${cate.getId()})"
+                      data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="true"
+                      th:id="'heading_'+${cate.getId()}"
+              >
+                <!--                      th:attr="data-bs-target=( ${cate.getId()} ? '#category_' + ${cate.getId()} : '#default-target' )"-->
+                소니
+              </button>
+              <form method="post" th:action="@{manage/category/remove}">
+                <input type="hidden" th:value="${cate.getId()}" th:name="id">
+                <button type="submit" class="btn btn-secondary" style="width: 55px">삭제</button>
+              </form>
+
+
+            </div>
           </div>
-          <div class="d-flex mb-1">
-            <button type="button" class="list-group-item list-group-item-action me-1 rounded-3" aria-current="true">
-              Xbox
-            </button>
-            <button type="button" class="btn btn-secondary" style="width: 75px">삭제</button>
-          </div>
-          <div class="d-flex mb-1">
-            <button type="button" class="list-group-item list-group-item-action me-1 rounded-3" aria-current="true">
-              닌텐도
-            </button>
-            <button type="button" class="btn btn-secondary" style="width: 75px">삭제</button>
-          </div>
-          <div class="d-flex mb-1">
-            <button type="button" class="list-group-item list-group-item-action me-1 rounded-3 disabled" aria-current="true">
-              steam
-            </button>
-            <button type="button" class="btn btn-secondary" style="width: 75px">삭제</button>
-          </div>
+
+
+          <form th:action="@{manage/category/add}" method="post" th:object="${category}">
+            <div class="d-flex mb-1">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">Eng</span>
+                <input th:field="*{name}" type="text" class="form-control me-1" aria-label="Sizing example input"
+                       placeholder="영어 이름">
+              </div>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">Kor</span>
+                <input th:field="*{nameKor}" type="text" class="form-control me-1" aria-label="Sizing example input"
+                       placeholder="한글 이름">
+              </div>
+              <button type="submit" class="btn btn-secondary" style="width: 100px">추가</button>
+            </div>
+          </form>
+
+          <form class="category_update" th:action="@{manage/category/update}" method="post" th:object="${category}">
+            <input th:field="*{id}" type="hidden" name="id" class="update_input">
+            <div class="d-flex mb-1">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">Eng</span>
+                <input th:field="*{name}" type="text" class="form-control me-1" aria-label="Sizing example input"
+                       placeholder="영어 이름">
+              </div>
+
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">Kor</span>
+                <input th:field="*{nameKor}" type="text" class="form-control me-1" aria-label="Sizing example input"
+                       placeholder="한글 이름">
+              </div>
+              <button type="submit" class="btn btn-secondary" style="width: 100px">수정</button>
+            </div>
+          </form>
+
         </div>
       </div>
 
+      <!--      카테고리 끝-->
 
-      <div class="col text-center h-100">
+      <div class="col text-center h-100 subcategory">
         <h4>서브 카테고리 관리</h4>
+        <!--        subcategoryByCategory-->
+        <div class="collapse" th:id="|category_${cate.getId()}|" th:each="cate : ${categoryList}">
+          <div class="card-body" th:classappend="|category_${cate.getId()}|">
+            <div class="d-flex mb-1" th:each="subcategory : ${subcategoryByCategory.get(cate.getId())}">
+              <button type="button" class="list-group-item list-group-item-action me-1 rounded-3" aria-current="true"
+                      th:attr_id="${subcategory.getId()}"
+                      th:text="|${subcategory.getNameKor()}(${subcategory.getName()})|">
+                Xbox
+              </button>
 
-        <div class="list-group">
-          <div class="d-flex mb-1">
-            <button type="button" class="list-group-item list-group-item-action me-1 active rounded-3" aria-current="true">
-              소니
-            </button>
-            <button type="button" class="btn btn-secondary" style="width: 75px">삭제</button>
+              <div style="width: 70px">
+                <form method="post" th:action="@{manage/subcategory/remove}">
+                  <input type="hidden" th:id="'delete_subcategory_'+${subcategory.getId()}" th:name="id">
+                  <button type="submit" class="btn btn-secondary">삭제</button>
+                </form>
+              </div>
+
+            </div>
           </div>
-          <div class="d-flex mb-1">
-            <button type="button" class="list-group-item list-group-item-action me-1 rounded-3" aria-current="true">
-              Xbox
-            </button>
-            <button type="button" class="btn btn-secondary" style="width: 75px">삭제</button>
-          </div>
-          <div class="d-flex mb-1">
-            <button type="button" class="list-group-item list-group-item-action me-1 rounded-3" aria-current="true">
-              닌텐도
-            </button>
-            <button type="button" class="btn btn-secondary" style="width: 75px">삭제</button>
-          </div>
-          <div class="d-flex mb-1">
-            <button type="button" class="list-group-item list-group-item-action me-1 rounded-3 disabled" aria-current="true">
-              steam
-            </button>
-            <button type="button" class="btn btn-secondary" style="width: 75px">삭제</button>
-          </div>
+
+          <form class="add_subcategory_form" th:action="@{manage/subcategory/add}" method="post"
+                th:object="${addSubcategoryForm}">
+            <input type="hidden" name="categoryId">
+            <div class="d-flex mb-1">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">Eng</span>
+                <input th:field="*{name}" type="text" class="form-control me-1" aria-label="Sizing example input"
+                       placeholder="영어 이름">
+              </div>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">Kor</span>
+                <input th:field="*{nameKor}" type="text" class="form-control me-1" aria-label="Sizing example input"
+                       placeholder="한글 이름">
+              </div>
+              <button type="submit" class="btn btn-secondary" style="width: 100px">추가</button>
+            </div>
+          </form>
+
+          <form class="subcategory_update" th:action="@{manage/subcategory/update}" method="post"
+                th:object="${addSubcategoryForm}">
+            <input type="hidden" th:field="*{categoryId}">
+            <input th:field="*{id}" type="hidden" name="id" class="subcategory_input">
+            <div class="d-flex mb-1">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">Eng</span>
+                <input th:field="*{name}" type="text" class="form-control me-1" aria-label="Sizing example input"
+                       placeholder="영어 이름">
+              </div>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">Kor</span>
+                <input th:field="*{nameKor}" type="text" class="form-control me-1" aria-label="Sizing example input"
+                       placeholder="한글 이름">
+              </div>
+              <button type="submit" class="btn btn-secondary" style="width: 100px">수정</button>
+            </div>
+          </form>
         </div>
       </div>
-<!--      row end-->
+      <!--      row end-->
     </div>
-<!--container end-->
+    <!--container end-->
   </div>
-
-
+  <input type="hidden" name="present_category" value="">
 </body>
+
+<script>
+
+  //active
+  document.querySelectorAll(".list-group-item-action")
+      .forEach(
+          function (elem) {
+            elem.addEventListener('click', (elem) => {
+                  let button = elem.currentTarget;
+                  if (button.classList.contains("active")) {
+                    button.classList.remove("active");
+                    return;
+                  }
+                  removeAll();
+                  button.classList.add("active");
+                }
+            )
+          }
+      );
+
+  //active 지우기
+  let removeAll = () => {
+    document.querySelectorAll(".list-group-item-action").forEach((elem) => {
+      if (elem.classList.contains("active")) {
+        elem.classList.remove("active");
+      }
+    });
+  }
+
+  //이벤트
+  document.querySelectorAll(".list-group-item-action")
+      .forEach(
+          function (elem) {
+            elem.addEventListener('click', (elem) => {
+                  let button = elem.currentTarget;
+                  let $brand = document.querySelector(".brand");
+                  let $category = document.querySelector(".category");
+                  let $subcategory = document.querySelector("div.subcategory");
+
+                  if ($brand.contains(button)) {
+                    let value = button.getAttribute('attr_id');
+                    document.querySelector(".brand_update .brand_input").value = value;
+                    return;
+                  }
+
+                  if ($category.contains(button)) {
+                    let value = button.getAttribute('attr_id');
+                    document.querySelector(".category_update .update_input").value = value;
+                    document.querySelector(".add_subcategory_form input[type=hidden]").value = value;
+                    document.querySelector("#category_" + value + " .subcategory_update input[name=categoryId]").value = value;
+                    document.querySelector("input[name=present_category]").value = value;
+                    return;
+                  }
+
+                  if ($subcategory.contains(button)) {
+                    let value = button.getAttribute('attr_id');
+                    let selectors = "#delete_subcategory_" + value;
+                    document.querySelector(selectors).value = value;
+                    let categoryId = document.querySelector("input[name=present_category]").value;
+                    document.querySelector("#category_" + categoryId + " .subcategory_update input[name=id]").value = value;
+                  }
+                }
+            );
+          }
+      );
+
+  document.querySelectorAll(".category button.list-group-item").forEach(
+      function (elem) {
+        elem.addEventListener('click', (event) => {
+          document.querySelectorAll("[id^='category_']").forEach(
+              function (elem) {
+                elem.classList.remove("show");
+              }
+          )
+        });
+      }
+  )
+</script>
 </html>

@@ -1,7 +1,11 @@
 package com.yet.project.domain.item;
 
+
+import lombok.Data;
+
+@Data
 public class ItemBrand {
     Long itemId;
-    Integer brandId;
+    Long brandId;
 
 }
