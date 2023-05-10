@@ -5,6 +5,7 @@ import com.yet.project.repository.dao.item.ItemDao;
 import com.yet.project.web.dto.item.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -139,5 +140,17 @@ public class ItemService {
         itemSubcategory.setSubcategoryId(itemInsertForm.getSubcategoryId());
         itemSubcategory.setItemId(item.getId());
         itemDao.addItemSubcategory(itemSubcategory);
+    }
+
+    public void loadAll(Model model) {
+        List<Category> categoryListAll = getCategoryListAll();
+        model.addAttribute("categoryList", categoryListAll);
+
+        //BrandList from DB
+        List<Brand> brandList = getBrandListAll();
+        model.addAttribute("brandList", brandList);
+
+        Map<Long, List<Subcategory>> subcategoryByCategory = getSubcategoryAllByCategoryId();
+        model.addAttribute("subcategoryByCategory", subcategoryByCategory);
     }
 }

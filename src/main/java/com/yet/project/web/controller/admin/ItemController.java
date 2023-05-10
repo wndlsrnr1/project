@@ -4,6 +4,9 @@ import com.yet.project.domain.item.Brand;
 import com.yet.project.domain.item.Category;
 import com.yet.project.domain.item.Item;
 import com.yet.project.domain.item.Subcategory;
+import com.yet.project.domain.item.validator.BrandValidator;
+import com.yet.project.domain.item.validator.CategoryValidator;
+import com.yet.project.domain.service.common.Util;
 import com.yet.project.domain.service.item.ItemService;
 import com.yet.project.web.dto.item.AddSubcategoryForm;
 import com.yet.project.web.dto.item.ItemJoined;
@@ -12,6 +15,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -23,6 +29,23 @@ import java.util.*;
 public class ItemController {
 
     private final ItemService itemService;
+    private final Util util;
+    private final CategoryValidator categoryValidator;
+    private final BrandValidator brandValidator;
+
+    //여러 모델 객체에 대해서 assign이 돌아가서 문제 생길 수 있음.
+//    @InitBinder("category")
+//    public void initBinder(WebDataBinder webDataBinder) {
+//        log.info("webDataBinder {}", webDataBinder);
+//        webDataBinder.addValidators(categoryValidator);
+//    }
+
+    @InitBinder("brand")
+    public void initBinderBrand(WebDataBinder webDataBinder) {
+        webDataBinder.addValidators(brandValidator);
+    }
+
+
 
     @ModelAttribute("item")
     public Item addItemTemporary() {
@@ -34,6 +57,7 @@ public class ItemController {
         item.setQuantity(100l);
         return item;
     }
+
 
     @GetMapping("/items")
     public String itemsViewRequest(
@@ -64,23 +88,27 @@ public class ItemController {
 
     @GetMapping("/item/categories/manage")
     public String categoriesManageViewRequest(@ModelAttribute("category") Category category, Model model, @ModelAttribute("brand") Brand brand, @ModelAttribute("addSubcategoryForm") AddSubcategoryForm addSubcategoryForm, @ModelAttribute("subcategory") Subcategory subcategory){
-        //category List from DB
-        List<Category> categoryListAll = itemService.getCategoryListAll();
-        model.addAttribute("categoryList", categoryListAll);
-
-        //BrandList from DB
-        List<Brand> brandList = itemService.getBrandListAll();
-        model.addAttribute("brandList", brandList);
-
-        Map<Long, List<Subcategory>> subcategoryByCategory = itemService.getSubcategoryAllByCategoryId();
-        model.addAttribute("subcategoryByCategory", subcategoryByCategory);
+        itemService.loadAll(model);
+//        //category List from DB
+//        List<Category> categoryListAll = itemService.getCategoryListAll();
+//        model.addAttribute("categoryList", categoryListAll);
+//
+//        //BrandList from DB
+//        List<Brand> brandList = itemService.getBrandListAll();
+//        model.addAttribute("brandList", brandList);
+//
+//        Map<Long, List<Subcategory>> subcategoryByCategory = itemService.getSubcategoryAllByCategoryId();
+//        model.addAttribute("subcategoryByCategory", subcategoryByCategory);
 
         return "/admin/items/categoriesManage";
     }
 
     @PostMapping("/item/categories/manage/category/add")
-    public String addCategory(@ModelAttribute("category") Category category) {
+    public String addCategory(@ModelAttribute("category") Category category, BindingResult bindingResult, @ModelAttribute("brand") Brand brand) {
         //검증
+        if (bindingResult.hasErrors()) {
+            return "/admin/items/categoriesManage";
+        }
 
         itemService.addCategory(category);
 
@@ -102,9 +130,13 @@ public class ItemController {
     }
 
     @PostMapping("/item/categories/manage/brand/add")
-    public String addBrand(@ModelAttribute("brand") Brand brand) {
+    public String addBrand(@Validated @ModelAttribute("brand") Brand brand, BindingResult bindingResult, @ModelAttribute("category") Category category, Model model, @ModelAttribute("addSubcategoryForm") AddSubcategoryForm addSubcategoryForm, @ModelAttribute("subcategory") Subcategory subcategory) {
         //검증
-
+        if (bindingResult.hasErrors()) {
+            log.info("asdfasdfadsf {}", bindingResult);
+            itemService.loadAll(model);
+            return "/admin/items/categoriesManage";
+        }
         itemService.addBrand(brand);
 
         return "redirect:/admin/item/categories/manage";
