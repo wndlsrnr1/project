@@ -27,17 +27,21 @@
           </div>
 
           <form th:action="@{manage/brand/add}" method="post" th:object="${brand}">
+            <div th:errors="*{name}" class="text-danger text-sm-start"></div>
+            <div th:errors="*{nameKor}" class="text-danger text-sm-start"></div>
             <div class="d-flex mb-1">
               <div class="input-group input-group-sm">
                 <span class="input-group-text">Eng</span>
                 <input th:field="*{name}" type="text" class="form-control me-1" aria-label="Sizing example input"
                        placeholder="영어 이름">
               </div>
+
               <div class="input-group input-group-sm">
                 <span class="input-group-text">Kor</span>
                 <input th:field="*{nameKor}" type="text" class="form-control" aria-label="Sizing example input"
                        placeholder="한글 이름">
               </div>
+
               <button type="submit" class="btn btn-secondary" style="width: 100px">추가</button>
             </div>
           </form>
@@ -103,11 +107,13 @@
                 <span class="input-group-text">Eng</span>
                 <input th:field="*{name}" type="text" class="form-control me-1" aria-label="Sizing example input"
                        placeholder="영어 이름">
+                <div th:errors="*{name}">asdsad</div>
               </div>
               <div class="input-group input-group-sm">
                 <span class="input-group-text">Kor</span>
                 <input th:field="*{nameKor}" type="text" class="form-control me-1" aria-label="Sizing example input"
                        placeholder="한글 이름">
+                <div th:errors="*{nameKor}">asdf</div>
               </div>
               <button type="submit" class="btn btn-secondary" style="width: 100px">추가</button>
             </div>
