@@ -5,6 +5,7 @@ import com.yet.project.web.dto.item.ItemJoined;
 import com.yet.project.web.dto.item.SubCategoryJoined;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ItemDao {
 
@@ -43,4 +44,12 @@ public interface ItemDao {
     void addItemBrand(ItemBrand itemBrand);
 
     void addItemSubcategory(ItemSubcategory itemSubcategory);
+
+    List<ItemJoined> selectFirstPageItems();
+
+    Map<Long, Brand> selectBrandByItemIds(List<Item> itemList);
+
+    Map<Long, Subcategory> selectSubcategoryByItemIds(List<Item> itemList);
+
+    Map<Long, Category> selectCategoriesBySubcategoryIds(List<Subcategory> collect);
 }

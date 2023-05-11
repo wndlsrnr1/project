@@ -2,6 +2,7 @@ package com.yet.project.domain.service.item;
 
 import com.yet.project.domain.item.*;
 import com.yet.project.repository.dao.item.ItemDao;
+import com.yet.project.repository.mybatismapper.item.ItemMapper;
 import com.yet.project.web.dto.item.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,11 +12,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class ItemService {
     private final ItemDao itemDao;
+    private final ItemMapper itemMapper;
 
     public void addCategory(Category category) {
         itemDao.saveCategory(category);
@@ -152,5 +155,46 @@ public class ItemService {
 
         Map<Long, List<Subcategory>> subcategoryByCategory = getSubcategoryAllByCategoryId();
         model.addAttribute("subcategoryByCategory", subcategoryByCategory);
+    }
+
+    public List<ItemJoined> getItemsByCondition(Long id, Long quantity1, Long quantity2, Long price1, Long price2, Long brandId, Long categoryId, Long subcategoryId) {
+        if ( id == null &&  quantity1 == null &&  quantity2 == null &&  price1 == null &&  price2 == null &&  brandId == null &&  categoryId == null &&  subcategoryId == null) {
+            List<Item> itemList = itemMapper.selectItemsLimit15();
+
+            Map<Long, Brand> itemBrandMap = itemDao.selectBrandByItemIds(itemList);
+
+            Map<Long, Subcategory> itemSubCategoryMap = itemDao.selectSubcategoryByItemIds(itemList);
+
+            Map<Long, Category> subcategoryCategoryMap = itemDao.selectCategoriesBySubcategoryIds(itemSubCategoryMap.values().stream().collect(Collectors.toList()));
+
+            Map<Long, ItemJoined> itemJoinedMap = new HashMap<>();
+
+            for (Item item : itemList) {
+                Long itemId = item.getId();
+                ItemJoined itemJoined = new ItemJoined();
+                itemJoined.setId(itemId);
+                itemJoined.setName(item.getName());
+                itemJoined.setNameKor(item.getNameKor());
+                itemJoined.setPrice(item.getPrice());
+                itemJoined.setQuantity(item.getQuantity());
+                if (itemBrandMap.containsKey(itemId) && itemBrandMap.get(itemId) != null) {
+                    itemJoined.setBrandNameKor(itemBrandMap.get(itemId).getNameKor());
+                }
+                if (itemSubCategoryMap.containsKey(itemId) && itemSubCategoryMap.get(itemId) != null) {
+                    Subcategory subcategory = itemSubCategoryMap.get(itemId);
+                    itemJoined.setSubcategoryNameKor(subcategory.getNameKor());
+                    if (subcategoryCategoryMap.containsKey(subcategory.getId()) && subcategoryCategoryMap.get(subcategory.getId()) != null) {
+                        itemJoined.setCategoryNameKor(subcategoryCategoryMap.get(itemSubCategoryMap.get(itemId).getId()).getNameKor());
+                    }
+                }
+
+                itemJoinedMap.put(itemId, itemJoined);
+            }
+
+            return new ArrayList<>(itemJoinedMap.values());
+        }
+
+        //조건 검색
+        return null;
     }
 }

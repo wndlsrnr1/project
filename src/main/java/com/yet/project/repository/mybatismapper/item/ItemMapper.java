@@ -103,7 +103,8 @@ public interface ItemMapper {
     @Update("UPDATE subcategory SET name=#{subcategory.name}, name_kor=#{subcategory.nameKor} WHERE id=#{subcategory.id}")
     void updateSubcategory(@Param("categoryId") Long categoryId, @Param("subcategory") Subcategory subcategory);
 
-    @Select("SELECT i.id, i.name, i.name_kor, i.quantity, i.price, b.name as brand_name, b.name_kor as brand_name_kor, s.name_kor as subcategory_name_kor, c.name_kor as category_name_kor FROM item i " +
+    @Select("SELECT i.id, i.name, i.name_kor, i.quantity, i.price, b.name as brand_name, b.name_kor as brand_name_kor, s.name_kor as subcategory_name_kor, c.name_kor as category_name_kor " +
+            "FROM item i " +
         "JOIN item_brand ib ON i.id = ib.item_id " +
         "JOIN brand b ON ib.brand_id = b.id " +
         "JOIN item_subcategory isub ON i.id = isub.item_id " +
@@ -111,6 +112,20 @@ public interface ItemMapper {
         "JOIN subcategory_category scc ON s.id = scc.subcategory_id " +
         "JOIN category c ON scc.category_id = c.id order by id asc limit 100")
     List<ItemJoined> selectItemBrandCategorySubcategoryJoined();
+
+    @Select("select id, name_kor, quantity, price from item order by id asc limit 15")
+    List<Item> selectItemsLimit15();
+
+    @Select("select b.id, b.name, b.name_kor from item_brand as ib join brand as b on ib.brand_id = b.id where ib.item_id = #{id}")
+    Brand selectBrandByItemId(Long id);
+
+    @Select("select s.id, s.name, s.name_kor from subcategory as s join item_subcategory as i on i.subcategory_id = s.id where i.item_id = #{id}")
+    Subcategory selectSubcategoryByItemId(Long id);
+
+    @Select("select c.id, c.name, c.name_kor from subcategory_category as sc left join category as c on sc.category_id = c.id where sc.subcategory_id = #{id}")
+    Category selectCategoryBySubcategoryId(Long id);
+
+
 
 
 
