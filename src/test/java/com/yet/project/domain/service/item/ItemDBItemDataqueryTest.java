@@ -6,6 +6,7 @@ import com.yet.project.domain.item.Item;
 import com.yet.project.domain.item.Subcategory;
 import com.yet.project.repository.dao.item.ItemDao;
 import com.yet.project.repository.mybatismapper.item.ItemMapper;
+import com.yet.project.service.AJ;
 import com.yet.project.web.dto.item.ItemInsertForm;
 import com.yet.project.web.dto.item.ItemJoined;
 import org.junit.jupiter.api.Test;
@@ -81,14 +82,9 @@ public class ItemDBItemDataqueryTest {
     @Test
     void ItemSelectTest() {
         List<Item> itemList = itemMapper.selectItemsLimit15();
-
         Map<Long, Brand> itemBrandMap = itemDao.selectBrandByItemIds(itemList);
-
         Map<Long, Subcategory> itemSubCategoryMap = itemDao.selectSubcategoryByItemIds(itemList);
-
-
         Map<Long, Category> subcategoryCategoryMap = itemDao.selectCategoriesBySubcategoryIds(itemSubCategoryMap.values().stream().collect(Collectors.toList()));
-
         Map<Long, ItemJoined> itemJoinedMap = new HashMap<>();
 
         for (Item item : itemList) {
@@ -113,11 +109,29 @@ public class ItemDBItemDataqueryTest {
             itemJoinedMap.put(id, itemJoined);
         }
 
-
-//        System.out.println("subcategoryCategoryMap = " + subcategoryCategoryMap);
-
-//        Map<Long, Category> subcategoryCategoryMap = new HashMap<>();
-
-
     }
+
+    @Test
+    void ItemDeleteTest() {
+        //DB에 있는 아이템 첫번째를 가져 왔을때
+        List<Item> itemList = itemMapper.selectItemsLimit15();
+        Item item = null;
+        if (!itemList.isEmpty() && itemList.get(0) != null) {
+            item = itemList.get(0);
+        }
+        //삭제
+
+        if (item == null) {
+            AJ.assertThat(item).isNull();
+        }
+
+        Long id = item.getId();
+        itemMapper.deleteItemById(id);
+
+        //그리고 나서 정보가 없음.
+        Item findItem = itemMapper.selectItemById(id);
+
+        AJ.assertThat(findItem).isNull();
+    }
+
 }

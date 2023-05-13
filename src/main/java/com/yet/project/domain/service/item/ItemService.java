@@ -157,7 +157,11 @@ public class ItemService {
         model.addAttribute("subcategoryByCategory", subcategoryByCategory);
     }
 
-    public List<ItemJoined> getItemsByCondition(Long id, Long quantity1, Long quantity2, Long price1, Long price2, Long brandId, Long categoryId, Long subcategoryId) {
+    public List<ItemJoined> getItemsByCondition(
+            Long id, Long quantity1, Long quantity2,
+            Long price1, Long price2, Long brandId,
+            Long categoryId, Long subcategoryId
+    ) {
         if ( id == null &&  quantity1 == null &&  quantity2 == null &&  price1 == null &&  price2 == null &&  brandId == null &&  categoryId == null &&  subcategoryId == null) {
             List<Item> itemList = itemMapper.selectItemsLimit15();
 
@@ -196,5 +200,9 @@ public class ItemService {
 
         //조건 검색
         return null;
+    }
+
+    public void removeItemByItemId(Long itemId) {
+        itemDao.deleteItemByItemId(itemId);
     }
 }

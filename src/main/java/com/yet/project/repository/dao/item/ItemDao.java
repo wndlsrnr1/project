@@ -52,4 +52,6 @@ public interface ItemDao {
     Map<Long, Subcategory> selectSubcategoryByItemIds(List<Item> itemList);
 
     Map<Long, Category> selectCategoriesBySubcategoryIds(List<Subcategory> collect);
+
+    void deleteItemByItemId(Long itemId);
 }

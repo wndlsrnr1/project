@@ -15,11 +15,7 @@ const ItemList = memo(() => {
   }
 
   const isAllChecked = () => {
-    if (itemSelected.length !== 0 && itemSelected.length === itemList.length) {
-      return true;
-    } else {
-      return false;
-    }
+    return itemSelected.length !== 0 && itemSelected.length === itemList.length;
   }
 
   useEffect(() => {

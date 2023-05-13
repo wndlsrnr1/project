@@ -158,5 +158,10 @@ public class ItemDaoImpl implements ItemDao {
         return subcategoryCategoryMap;
     }
 
+    @Override
+    public void deleteItemByItemId(Long itemId) {
+        itemMapper.deleteItemById(itemId);
+    }
+
 
 }

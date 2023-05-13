@@ -125,9 +125,11 @@ public interface ItemMapper {
     @Select("select c.id, c.name, c.name_kor from subcategory_category as sc left join category as c on sc.category_id = c.id where sc.subcategory_id = #{id}")
     Category selectCategoryBySubcategoryId(Long id);
 
+    @Select("select id, name, name_kor from item where id=#{id}")
+    Item selectItemById(Long id);
 
-
-
+    @Delete("delete from Item where id = #{id}")
+    void deleteItemById(Long id);
 
 
     /*
