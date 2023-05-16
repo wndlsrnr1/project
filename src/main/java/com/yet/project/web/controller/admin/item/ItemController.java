@@ -1,4 +1,4 @@
-package com.yet.project.web.controller.admin;
+package com.yet.project.web.controller.admin.item;
 
 import com.yet.project.domain.item.Brand;
 import com.yet.project.domain.item.Category;

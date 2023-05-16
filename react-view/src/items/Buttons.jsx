@@ -39,6 +39,7 @@ const Buttons = memo(() => {
         <Modal isOpen={modal}>
           <ModalHeader closeButton hideCloseButton={true} className={"text-xs-start"}>삭제경고</ModalHeader>
           <ModalBody className={"text-xxl"}>
+            {/*data 없을때 뜨지 않음.*/}
             정말 데이터를 지우시겠습니까?
           </ModalBody>
           <ModalFooter>

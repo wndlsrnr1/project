@@ -1,13 +1,16 @@
-package com.yet.project.web.controller.admin;
+package com.yet.project.web.controller.admin.item;
 
 import com.yet.project.domain.item.Item;
 import com.yet.project.domain.service.item.ItemService;
 import com.yet.project.web.dto.item.ItemJoined;
+import com.yet.project.web.exception.admin.item.ItemEmptyException;
+import com.yet.project.web.exception.admin.item.ItemMisMatchException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -36,19 +39,19 @@ public class ItemRestController {
 
     @PostMapping("/delete")
     ResponseEntity deleteItems(@RequestParam("itemIdList[]") List<Long> itemIdList) {
-        //Number format Exception 예외처리 하기
-        //잘 못된 key로 왔을때 예외 처리 하기
-        //상품이 DB에 없을때 NullPointerException
+        //number format exception 예외처리 하기 O
 
-        if (itemIdList == null) {
-            return ResponseEntity.badRequest().build();
+        //잘 못된 key로 왔을때 예외 처리 하기 O
+
+        //상품이 DB에 없을때 NullPointerException
+        log.info("itemIdList {} ", itemIdList);
+        if (itemIdList == null || itemIdList.size() == 0) {
+            throw new ItemEmptyException();
         }
 
         for (Long itemId : itemIdList) {
-            try {
-                itemService.removeItemByItemId(itemId);
-            } catch (NullPointerException e) {
-                return ResponseEntity.badRequest().build();
+            if (!itemService.removeItemByItemId(itemId)) {
+                throw new ItemMisMatchException(String.valueOf(itemId));
             }
         }
 

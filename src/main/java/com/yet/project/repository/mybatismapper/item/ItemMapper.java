@@ -129,7 +129,7 @@ public interface ItemMapper {
     Item selectItemById(Long id);
 
     @Delete("delete from Item where id = #{id}")
-    void deleteItemById(Long id);
+    boolean deleteItemById(Long id);
 
 
     /*

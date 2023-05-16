@@ -159,8 +159,8 @@ public class ItemDaoImpl implements ItemDao {
     }
 
     @Override
-    public void deleteItemByItemId(Long itemId) {
-        itemMapper.deleteItemById(itemId);
+    public Boolean deleteItemByItemId(Long itemId) {
+        return itemMapper.deleteItemById(itemId);
     }
 
 

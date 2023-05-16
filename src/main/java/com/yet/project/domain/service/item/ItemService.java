@@ -202,7 +202,7 @@ public class ItemService {
         return null;
     }
 
-    public void removeItemByItemId(Long itemId) {
-        itemDao.deleteItemByItemId(itemId);
+    public boolean removeItemByItemId(Long itemId) {
+        return itemDao.deleteItemByItemId(itemId);
     }
 }
