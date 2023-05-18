@@ -1,16 +1,17 @@
 package com.yet.project.web.controller.admin.item;
 
-import com.yet.project.domain.item.Item;
+import com.yet.project.domain.item.Brand;
+import com.yet.project.domain.item.Category;
+import com.yet.project.domain.item.Subcategory;
 import com.yet.project.domain.service.item.ItemService;
+import com.yet.project.web.dto.item.AddItemForm;
 import com.yet.project.web.dto.item.ItemJoined;
-import com.yet.project.web.exception.admin.item.ItemEmptyException;
-import com.yet.project.web.exception.admin.item.ItemMisMatchException;
+import com.yet.project.web.dto.item.SubcategoryDto;
+import com.yet.project.web.exception.admin.item.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -57,4 +58,89 @@ public class ItemRestController {
 
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/get/brands")
+    public List<Brand> getItems() {
+        List<Brand> brandListAll = itemService.getBrandListAll();
+
+        if (brandListAll == null || brandListAll.isEmpty()) {
+            throw new NoBrandListException();
+        }
+
+        return brandListAll;
+    }
+
+    @GetMapping("/get/categories")
+    public List<Category> getCategories() {
+        List<Category> categoryList = itemService.getCategoryListAll();
+
+        if (categoryList == null || categoryList.isEmpty()) {
+            throw new NoCategoryListException();
+        }
+
+        return categoryList;
+    }
+
+    @GetMapping("/get/subcategory/{categoryId}")
+    public SubcategoryDto getSubcategoriesByCategoryId(@PathVariable Long categoryId) {
+
+        List<Subcategory> subcategoryDtoList = itemService.getSubcategoryListByCategoryId(categoryId);
+
+        if (subcategoryDtoList == null || subcategoryDtoList.isEmpty()) {
+            throw new NoSubCategoryListException();
+        }
+
+        SubcategoryDto subcategoryDto = new SubcategoryDto();
+        subcategoryDto.setSubcategoryList(subcategoryDtoList);
+        subcategoryDto.setCategoryId(categoryId);
+
+        return subcategoryDto;
+    }
+
+    @PostMapping("/add")
+    public ResponseEntity addItem(AddItemForm addItemForm) {
+        if (addItemForm == null) {
+            throw new IllegalArgumentException();
+        }
+
+        String name = addItemForm.getName();
+        String nameKor = addItemForm.getNameKor();
+        Long price = addItemForm.getPrice();
+        Long quantity = addItemForm.getQuantity();
+        Long brandId = addItemForm.getBrandId();
+        Long categoryId = addItemForm.getCategoryId();
+
+        if (name == null || nameKor == null || price == null || quantity == null || brandId == null || categoryId == null) {
+            throw new IllegalArgumentException();
+        }
+
+        if (price < 0 || quantity < 0) {
+            throw new IllegalArgumentException();
+        }
+
+
+        //bad request
+        if (!itemService.isBrand(addItemForm.getBrandId())) {
+            throw new BrandMismatchException();
+        }
+        if (!itemService.isCategory(addItemForm.getCategoryId())) {
+            throw new CategoryMismatchException();
+        }
+        if (addItemForm.getSubcategoryId() != null && !itemService.isSubcategory(addItemForm.getSubcategoryId())) {
+            throw new SubcategoryMismatchException();
+        }
+
+        //202 옳은 요청이지만 실행되지 않음.
+        Boolean added = itemService.addItem(addItemForm);
+        if (!added) {
+            return ResponseEntity.accepted().build();
+        }
+
+        //200
+        return ResponseEntity.ok().build();
+    }
+
+
+
+
 }

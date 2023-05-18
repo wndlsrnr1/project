@@ -5,6 +5,7 @@ import com.yet.project.repository.dao.item.ItemDao;
 import com.yet.project.repository.mybatismapper.item.ItemMapper;
 import com.yet.project.web.dto.item.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class ItemService {
     private final ItemDao itemDao;
     private final ItemMapper itemMapper;
@@ -122,7 +124,7 @@ public class ItemService {
         return itemDao.findItemJoinedList();
     }
 
-    public void addItem(ItemInsertForm itemInsertForm) {
+    public void addItemDpreciated(ItemInsertForm itemInsertForm) {
         //Item Insert
         Item item = new Item();
         item.setNameKor(itemInsertForm.getNameKor());
@@ -204,5 +206,59 @@ public class ItemService {
 
     public boolean removeItemByItemId(Long itemId) {
         return itemDao.deleteItemByItemId(itemId);
+    }
+
+    public List<Subcategory> getSubcategoryListByCategoryId(Long categoryId) {
+        List<Subcategory> subcategoryList = itemDao.selectSubcategoryByCategoryId(categoryId);
+        return subcategoryList;
+    }
+
+    public Boolean addItem(AddItemForm addItemForm) {
+        try {
+            //item
+            Item item = new Item();
+            item.setPrice(addItemForm.getPrice());
+            item.setQuantity(addItemForm.getQuantity());
+            item.setName(addItemForm.getName());
+            item.setNameKor(addItemForm.getNameKor());
+            itemMapper.insertItem(item);
+
+            //item_brand
+            ItemBrand itemBrand = new ItemBrand();
+            itemBrand.setItemId(item.getId());
+            itemBrand.setBrandId(addItemForm.getBrandId());
+            itemMapper.insertItemBrand(itemBrand);
+
+            //item_subcategory
+            ItemSubcategory itemSubcategory = new ItemSubcategory();
+            itemSubcategory.setItemId(item.getId());
+            itemSubcategory.setSubcategoryId(addItemForm.getSubcategoryId());
+            itemMapper.insertItemSubcategory(itemSubcategory);
+
+            //item_category
+            ItemCategory itemCategory = new ItemCategory();
+            itemCategory.setItemId(item.getId());
+            itemCategory.setCategoryId(addItemForm.getCategoryId());
+            itemMapper.insertItemCategory(itemCategory);
+        } catch (Exception e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public Boolean isBrand(Long brandId) {
+        Brand brand = itemMapper.selectBrandByBrandId(brandId);
+        return brand != null;
+    }
+
+    public Boolean isSubcategory(Long subcategoryId) {
+        Subcategory subcategory = itemMapper.selectSubcategoryById(subcategoryId);
+        return subcategory != null;
+    }
+
+    public Boolean isCategory(Long categoryId) {
+        Category category = itemMapper.selectCategoryById(categoryId);
+        return category != null;
     }
 }

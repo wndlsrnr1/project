@@ -65,7 +65,7 @@ public class ItemDBItemDataqueryTest {
             itemInsertForm.setSubcategoryId(itemMapper.selectSubCategoryAll().get(0).getSubcategoryId());
             itemInsertForm.setPrice(123124L + i);
             itemInsertForm.setQuantity(123123L + i);
-            itemService.addItem(itemInsertForm);
+            itemService.addItemDpreciated(itemInsertForm);
         }
     }
 

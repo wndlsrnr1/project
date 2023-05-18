@@ -4,6 +4,8 @@ import com.yet.project.web.controller.CommonRestControllerAdvice;
 import com.yet.project.web.dto.item.error_result.ItemErrorDto;
 import com.yet.project.web.exception.admin.item.ItemEmptyException;
 import com.yet.project.web.exception.admin.item.ItemMisMatchException;
+import com.yet.project.web.exception.admin.item.NoBrandListException;
+import com.yet.project.web.exception.admin.item.NoCategoryListException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.MessageSource;
@@ -85,4 +87,36 @@ public class ItemRestControllerAdvice extends CommonRestControllerAdvice {
         Integer code = HttpStatus.BAD_REQUEST.value();
         return new ItemErrorDto(error, code, message);
     }
+
+    @ExceptionHandler({NoBrandListException.class})
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public ItemErrorDto handleNoBrandListException(NoBrandListException e) {
+        String error = getOnlyClassName(e);
+        String message = messageSource.getMessage("error.no_brand_list_exception", null, "no brand list exception", Locale.KOREA);
+        Integer code = HttpStatus.NO_CONTENT.value();
+        return new ItemErrorDto(error, code, message);
+    }
+
+    @ExceptionHandler({NoCategoryListException.class})
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public ItemErrorDto handleNoCategoryListException(NoCategoryListException e) {
+        String error = getOnlyClassName(e);
+        String message = messageSource.getMessage("error.no_category_list_exception", null, "no category list exception", Locale.KOREA);
+        Integer code = HttpStatus.NO_CONTENT.value();
+        return new ItemErrorDto(error, code, message);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    public ItemErrorDto handleIllegalArgumentException(IllegalArgumentException e) {
+        String error = getOnlyClassName(e);
+        Integer code = HttpStatus.BAD_REQUEST.value();
+        String message = messageSource.getMessage("error.illegal_argument_exception", null, "illegal argument exception", Locale.KOREA);
+        return new ItemErrorDto(error, code, message);
+    }
+
+
+
+
+
 }

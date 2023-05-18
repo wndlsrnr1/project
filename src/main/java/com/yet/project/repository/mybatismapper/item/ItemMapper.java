@@ -131,6 +131,25 @@ public interface ItemMapper {
     @Delete("delete from Item where id = #{id}")
     boolean deleteItemById(Long id);
 
+    @Select("SELECT S.ID, S.NAME, S.NAME_KOR FROM SUBCATEGORY_CATEGORY AS SC JOIN SUBCATEGORY AS S ON SC.SUBCATEGORY_ID = S.ID WHERE SC.CATEGORY_ID=#{categoryId}")
+    List<Subcategory> selectSubcategoryByCategoryIdAll(Long categoryId);
+
+    @Select("SELECT ID, NAME, NAME_KOR FROM SUBCATEGORY SUBCATEGORY LEFT JOIN SUBCATEGORY_CATEGORY MAPPING ON SUBCATEGORY.ID = MAPPING.SUBCATEGORY_ID WHERE MAPPING.CATEGORY_ID IS NULL")
+    List<Subcategory> selectSubcategoryWhereCategoryIdNull();
+
+    @Select("select sc.category_id, s.id, s.name, s.name_kor from subcategory as s join subcategory_category as sc on sc.subcategory_id = s.id where category_id = #{categoryId}")
+    List<Subcategory> selectSubCategoryByCategoryId(Long categoryId);
+
+    @Select("select id, name, name_kor from brand where id = #{brandId}")
+    Brand selectBrandByBrandId(Long brandId);
+
+    @Select("select id, name, name_kor from subcategory where id = #{subcategoryId}")
+    Subcategory selectSubcategoryById(Long subcategoryId);
+
+    @Insert("insert into item_category (item_id, category_id) values (#{itemId}, #{categoryId})")
+    void insertItemCategory(ItemCategory itemCategory);
+
+
 
     /*
     @Select("select uid, email, password from users where email = #{email}")

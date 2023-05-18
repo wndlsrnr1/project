@@ -1,13 +1,12 @@
 package com.yet.project.web.exception.admin.item;
 
 
-public class ItemMisMatchException extends RuntimeException{
+public class ItemMisMatchException extends IllegalArgumentException{
     public ItemMisMatchException() {
-        super();
     }
 
-    public ItemMisMatchException(String message) {
-        super(message);
+    public ItemMisMatchException(String s) {
+        super(s);
     }
 
     public ItemMisMatchException(String message, Throwable cause) {
@@ -16,9 +15,5 @@ public class ItemMisMatchException extends RuntimeException{
 
     public ItemMisMatchException(Throwable cause) {
         super(cause);
-    }
-
-    protected ItemMisMatchException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
     }
 }

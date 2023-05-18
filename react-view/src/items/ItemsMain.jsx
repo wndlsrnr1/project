@@ -23,7 +23,7 @@ export const actionObj = {
   addInputElem: "addInputElem",
   warningToggle: "warningToggle",
   addToggle: "addToggle",
-
+  updatePage: "updatePage",
 }
 
 //변수
@@ -50,6 +50,11 @@ const reducer = (state, action) => {
       return {
         ...state, itemList: itemList, load: true
       }
+    }
+
+    //update 하기
+    case  actionObj.updatePage: {
+      return state;
     }
 
     case actionObj.selectAllItems: {
@@ -88,6 +93,7 @@ const reducer = (state, action) => {
 
     case actionObj.addToggle: {
       console.log(action.addModal);
+
       return {
         ...state, addModal: !action.addModal,
       }
