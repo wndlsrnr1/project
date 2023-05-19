@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="common/common :: common_head(~{::title})">
+  <title>상품 목록</title>
+</head>
+<body>
+  <div class="container" style="max-width: 600px">
+    <div class="py-5 text-center">
+      <h2>상품 목록</h2>
+    </div>
+
+    <div class="p-1">
+      <form action="" >
+        <!--        브랜드-->
+        <div class="container p-0 d-flex justify-content-between">
+
+          <div class="d-inline-block">
+            <select class="form-select" name="">
+              <option selected="">브랜드</option>
+              <option value="1">One</option>
+              <option value="2">Two</option>
+              <option value="3">Three</option>
+            </select>
+          </div>
+          <!--        카테고리-->
+          <div class="d-inline-block">
+            <select class="form-select" name="">
+              <option selected="">카테고리</option>
+              <option value="1">One</option>
+              <option value="2">Two</option>
+              <option value="3">Three</option>
+            </select>
+          </div>
+
+          <!--        서브카테고리-->
+          <div class="d-inline-block">
+            <select class="form-select" name="">
+              <option selected="">서브카테고리</option>
+              <option value="1">One</option>
+              <option value="2">Two</option>
+              <option value="3">Three</option>
+            </select>
+          </div>
+
+
+          <!--        가격범위-->
+          <div class="dropdown d-inline-block">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+              가격 범위
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li>
+                <div class="input-group p-1">
+                  <input type="text" class="form-control">
+                  <span class="input-group-text">₩ 이상</span>
+                </div>
+              </li>
+              <li>
+                <div class="input-group p-1">
+                  <input type="text" class="form-control">
+                  <span class="input-group-text">₩ 이하</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!--        수량 범위-->
+          <div class="dropdown d-inline-block">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+              수량 범위
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li>
+                <div class="input-group p-1">
+                  <input type="text" class="form-control">
+                  <span class="input-group-text">개 이상</span>
+                </div>
+              </li>
+
+              <li>
+                <div class="input-group p-1">
+                  <input type="text" class="form-control">
+                  <span class="input-group-text">개 이하</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+
+<!--          form container 끝-->
+        </div>
+
+        <div class="d-flex py-1">
+          <div class="input-group pe-1">
+            <span class="input-group-text">상품명</span>
+            <input type="text" class="form-control">
+          </div>
+
+          <div class="input-group" style="width: 60px">
+            <button type="button" class="btn btn-primary">검색</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="text-center">
+      <table class="table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>ID</th>
+            <th>상품명</th>
+            <th>가격</th>
+            <th>수량</th>
+            <th>브랜드</th>
+            <th>카테고리</th>
+            <th>서브카테고리</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <input id="1" type="checkbox" class="">
+            </td>
+            <td>1</td>
+            <td>플스본체</td>
+            <td>1000</td>
+            <td>2</td>
+            <td>sony</td>
+            <td>게임기기</td>
+            <td>본체</td>
+          </tr>
+          <tr th:each="item : ${items}">
+            <td><a href="item.html" th:href="@{/form/items/{itemId}(itemId=${item.id})}" th:text="${item.id}">회원id</a>
+            </td>
+            <td><a href="item.html" th:href="@{|/form/items/${item.id}|}" th:text="${item.itemName}">상품명</a></td>
+            <td th:text="${item.price}">10000</td>
+            <td th:text="${item.quantity}">10</td>
+            <td th:text="${item.brand}">PS5</td>
+            <td th:text="${item.category}">악세서리</td>
+            <td th:text="${item.subcategory}">헤드셋</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+
+    <div class="d-flex justify-content-between mt-3">
+      <div class="row">
+        <div class="col">
+          <button class="btn btn-secondary float-end" type="button"
+                  onclick="location.href='addForm.html'"
+                  th:onclick="|location.href='@{/form/items/add}'|">삭제
+         </button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <button class="btn btn-primary float-end" type="button"
+                  onclick="location.href='addForm.html'"
+                  th:onclick="|location.href='@{/form/items/add}'|">상품 등록
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!--  pagination-->
+    <div class="d-flex justify-content-center mt-3">
+      <nav aria-label="Page navigation example">
+        <ul class="pagination">
+          <li class="page-item"><a class="page-link" href="#">이전</a></li>
+          <li class="page-item"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">3</a></li>
+          <li class="page-item"><a class="page-link" href="#">4</a></li>
+          <li class="page-item"><a class="page-link" href="#">5</a></li>
+          <li class="page-item"><a class="page-link" href="#">다음</a></li>
+        </ul>
+      </nav>
+    </div>
+
+  </div> <!-- /container -->
+
+
+
+
+</body>
+
+<script>
+</script>
+</html>
