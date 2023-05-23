@@ -1,10 +1,11 @@
 import React, {memo, useCallback, useContext, useEffect, useReducer, useRef} from "react";
 import {Input, Table} from "reactstrap";
 import {ItemsContext, actionObj} from "./ItemsMain";
+import data from "bootstrap/js/src/dom/data";
 
 
 const ItemList = memo(() => {
-  const {dispatch, itemList, load, itemSelected, brand, subcategory, category, price, quantity, nameKor} = useContext(ItemsContext);
+  const {dispatch, itemList, load, itemSelected, searchState} = useContext(ItemsContext);
 
   //변수확인
   useEffect(() => {
@@ -19,14 +20,22 @@ const ItemList = memo(() => {
   }
 
   useEffect(() => {
-    if (load) {
-      return;
-    }
-    fetch("/admin/items").then((response) => response.json())
+    let formData = new FormData();
+    Object.keys(searchState).forEach(key=> {
+      formData.append(key, searchState[key]);
+    })
+
+    fetch("/admin/items", {
+      method: "post",
+      body: formData,
+    }).then((response) => response.json())
       .then(data => {
-        dispatch({type: actionObj.initialPage, itemList: data});
+        console.log("data.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.total       ", data.total);
+        //검색 상태값 바꾸기
+        dispatch({type: actionObj.initialPage, itemList: data.itemList});
+        dispatch({type: actionObj.setTotal, total: data.total});
       });
-  }, [itemList]);
+  }, [searchState, load]);
 
   const onClickInputs = (event) => {
     if (itemSelected.includes(parseInt(event.target.value))) {
@@ -58,7 +67,8 @@ const ItemList = memo(() => {
             return (
               <tr key={elem.id}>
                 <td>
-                  <Input name={"id"} id={`id_${elem.id}`} value={elem.id} type={"checkbox"} onClick={onClickInputs} checked={itemSelected.includes(parseInt(elem.id))}/>
+                  <Input name={"id"} id={`id_${elem.id}`} value={elem.id} type={"checkbox"} onClick={onClickInputs}
+                         checked={itemSelected.includes(parseInt(elem.id))}/>
                 </td>
                 <td>{elem.id}</td>
                 <td>{elem.nameKor}</td>

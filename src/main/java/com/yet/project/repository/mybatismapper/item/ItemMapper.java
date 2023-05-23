@@ -2,6 +2,7 @@ package com.yet.project.repository.mybatismapper.item;
 
 import com.yet.project.domain.item.*;
 import com.yet.project.web.dto.item.ItemJoined;
+import com.yet.project.web.dto.item.ItemSearchDto;
 import com.yet.project.web.dto.item.SubCategoryJoined;
 import org.apache.ibatis.annotations.*;
 
@@ -105,12 +106,12 @@ public interface ItemMapper {
 
     @Select("SELECT i.id, i.name, i.name_kor, i.quantity, i.price, b.name as brand_name, b.name_kor as brand_name_kor, s.name_kor as subcategory_name_kor, c.name_kor as category_name_kor " +
             "FROM item i " +
-        "JOIN item_brand ib ON i.id = ib.item_id " +
-        "JOIN brand b ON ib.brand_id = b.id " +
-        "JOIN item_subcategory isub ON i.id = isub.item_id " +
-        "JOIN subcategory s ON isub.subcategory_id = s.id " +
-        "JOIN subcategory_category scc ON s.id = scc.subcategory_id " +
-        "JOIN category c ON scc.category_id = c.id order by id asc limit 100")
+            "JOIN item_brand ib ON i.id = ib.item_id " +
+            "JOIN brand b ON ib.brand_id = b.id " +
+            "JOIN item_subcategory isub ON i.id = isub.item_id " +
+            "JOIN subcategory s ON isub.subcategory_id = s.id " +
+            "JOIN subcategory_category scc ON s.id = scc.subcategory_id " +
+            "JOIN category c ON scc.category_id = c.id order by id asc limit 100")
     List<ItemJoined> selectItemBrandCategorySubcategoryJoined();
 
     @Select("select id, name_kor, quantity, price from item order by id asc limit 15")
@@ -137,7 +138,9 @@ public interface ItemMapper {
     @Select("SELECT ID, NAME, NAME_KOR FROM SUBCATEGORY SUBCATEGORY LEFT JOIN SUBCATEGORY_CATEGORY MAPPING ON SUBCATEGORY.ID = MAPPING.SUBCATEGORY_ID WHERE MAPPING.CATEGORY_ID IS NULL")
     List<Subcategory> selectSubcategoryWhereCategoryIdNull();
 
-    @Select("select sc.category_id, s.id, s.name, s.name_kor from subcategory as s join subcategory_category as sc on sc.subcategory_id = s.id where category_id = #{categoryId}")
+    @Select("select sc.category_id, s.id, s.name, s.name_kor from subcategory as s " +
+            "join subcategory_category as sc on sc.subcategory_id = s.id " +
+            "where category_id = #{categoryId}")
     List<Subcategory> selectSubCategoryByCategoryId(Long categoryId);
 
     @Select("select id, name, name_kor from brand where id = #{brandId}")
@@ -148,6 +151,49 @@ public interface ItemMapper {
 
     @Insert("insert into item_category (item_id, category_id) values (#{itemId}, #{categoryId})")
     void insertItemCategory(ItemCategory itemCategory);
+
+    @Select({
+            "SELECT i.id, i.name, i.name_kor, i.price, i.quantity, item_s.subcategory_id, ib.brand_id, ic.category_id",
+            "FROM item AS i",
+            "JOIN item_subcategory AS item_s ON i.id = item_s.item_id",
+            "JOIN item_brand AS ib ON ib.item_id = i.id",
+            "left Join item_category as ic on ic.item_id = i.id",
+            "WHERE 1=1",
+            "AND item_s.subcategory_id >= #{subcategoryId1}",
+            "AND item_s.subcategory_id <= #{subcategoryId2}",
+            "AND ib.brand_id >= #{brandId1}",
+            "AND ib.brand_id <= #{brandId2}",
+            "and ic.category_id >= #{categoryId1}",
+            "and ic.category_id <= #{categoryId2}",
+            "AND i.quantity >= #{quantity1}",
+            "AND i.quantity <= #{quantity2}",
+            "AND i.price >= #{price1}",
+            "AND i.price <= #{price2}",
+            "AND (i.name LIKE CONCAT('%', #{itemName}, '%') OR i.name_kor LIKE CONCAT('%', #{itemName}, '%'))",
+            "ORDER BY i.id ASC LIMIT #{page}, #{perPage}",
+    })
+    List<ItemJoined> selectItemJoinedByCondition(ItemSearchDto itemSearchDto);
+
+    @Select({
+            "SELECT i.id, i.name, i.name_kor, i.price, i.quantity, item_s.subcategory_id, ib.brand_id, ic.category_id",
+            "FROM item AS i",
+            "JOIN item_subcategory AS item_s ON i.id = item_s.item_id",
+            "JOIN item_brand AS ib ON ib.item_id = i.id",
+            "left Join item_category as ic on ic.item_id = i.id",
+            "WHERE 1=1",
+            "AND item_s.subcategory_id >= #{subcategoryId1}",
+            "AND item_s.subcategory_id <= #{subcategoryId2}",
+            "AND ib.brand_id >= #{brandId1}",
+            "AND ib.brand_id <= #{brandId2}",
+            "and ic.category_id >= #{categoryId1}",
+            "and ic.category_id <= #{categoryId2}",
+            "AND i.quantity >= #{quantity1}",
+            "AND i.quantity <= #{quantity2}",
+            "AND i.price >= #{price1}",
+            "AND i.price <= #{price2}",
+            "AND (i.name LIKE CONCAT('%', #{itemName}, '%') OR i.name_kor LIKE CONCAT('%', #{itemName}, '%'))",
+    })
+    List<ItemSearchDto> countItemsByValue(ItemSearchDto filterValue);
 
 
 

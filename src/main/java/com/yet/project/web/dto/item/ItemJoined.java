@@ -12,4 +12,7 @@ public class ItemJoined {
     String brandNameKor;
     String categoryNameKor;
     String subcategoryNameKor;
+    Long brandId;
+    Long categoryId;
+    Long subcategoryId;
 }

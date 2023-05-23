@@ -59,18 +59,6 @@ public class ItemController {
     }
 
 
-//    @GetMapping("/items")
-//    public String itemsViewRequest(
-//        @RequestParam(value = "search", defaultValue = "false") Boolean search, Model model
-//    ) {
-//        if (!search) {
-//            List<ItemJoined> itemList = itemService.findItemJoinedList();
-//            //model.addAttribute("itemList", itemList);
-//            return "/admin/items/items";
-//        }
-//        return "/admin/items/items";
-//    }
-
 
     @GetMapping("/item/{itemId}")
     public String itemDetailViewRequest(@PathVariable Long itemId) {

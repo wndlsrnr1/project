@@ -5,6 +5,8 @@ import com.yet.project.repository.dao.item.ItemDao;
 import com.yet.project.repository.mybatismapper.item.ItemMapper;
 import com.yet.project.service.AJ;
 import com.yet.project.web.dto.item.AddItemForm;
+import com.yet.project.web.dto.item.ItemJoined;
+import com.yet.project.web.dto.item.ItemSearchDto;
 import com.yet.project.web.dto.item.SubCategoryJoined;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +22,7 @@ import java.util.*;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @MapperScan("com.yet.project.repository.mybatismapper")
-@Transactional
+//@Transactional
 class ItemServiceDBTest {
 
     @Autowired
@@ -130,10 +132,10 @@ class ItemServiceDBTest {
         addItemForm.setPrice(1l);
         addItemForm.setQuantity(1l);
         Long id = itemMapper.selectCategoryAll().get(0).getId();
-        addItemForm.setCategoryId(id);
-        addItemForm.setName("name");
+        addItemForm.setCategoryId(36L);
+        addItemForm.setName("name of item");
         addItemForm.setNameKor("이름");
-        addItemForm.setSubcategoryId(itemMapper.selectSubCategoryByCategoryId(id).get(0).getId());
+        addItemForm.setSubcategoryId(33L);
 
         //mapper
 
@@ -157,15 +159,92 @@ class ItemServiceDBTest {
         itemSubcategory.setSubcategoryId(addItemForm.getSubcategoryId());
         itemMapper.insertItemSubcategory(itemSubcategory);
 
+        ItemCategory itemCategory = new ItemCategory();
+        itemCategory.setItemId(item.getId());
+        itemCategory.setCategoryId(addItemForm.getCategoryId());
+        itemMapper.insertItemCategory(itemCategory);
+
         //check item service works
         Item item1 = itemMapper.selectItemById(item.getId());
         ItemBrand itemBrand1 = itemMapper.selectItemBrandByItemId(item.getId());
         ItemSubcategory itemSubcategory1 = itemMapper.selectItemSubcategoryByItemId(item.getId());
 
+
         AJ.assertThat(item1.getId()).isEqualTo(item.getId());
         AJ.assertThat(itemBrand1).isEqualTo(itemBrand);
         AJ.assertThat(itemSubcategory1).isEqualTo(itemSubcategory);
 
+
+    }
+
+    @Test
+    void insert123() {
+        for (int i = 0; i < 100; i++) {
+            AddItemForm addItemForm = new AddItemForm();
+
+            //find info randomly
+            addItemForm.setBrandId(itemMapper.selectBrandsAll().get(0).getId());
+            addItemForm.setPrice(1l);
+            addItemForm.setQuantity(1l);
+            Long id = itemMapper.selectCategoryAll().get(0).getId();
+            addItemForm.setCategoryId(36L);
+            addItemForm.setName("name of item " + i);
+            addItemForm.setNameKor("이름 " + i);
+            addItemForm.setSubcategoryId(33L);
+
+            //mapper
+
+            //item
+            Item item = new Item();
+            item.setPrice(addItemForm.getPrice());
+            item.setQuantity(addItemForm.getQuantity());
+            item.setName(addItemForm.getName());
+            item.setNameKor(addItemForm.getNameKor());
+            itemMapper.insertItem(item);
+
+            //item_brand
+            ItemBrand itemBrand = new ItemBrand();
+            itemBrand.setItemId(item.getId());
+            itemBrand.setBrandId(addItemForm.getBrandId());
+            itemMapper.insertItemBrand(itemBrand);
+
+            //item_subcategory
+            ItemSubcategory itemSubcategory = new ItemSubcategory();
+            itemSubcategory.setItemId(item.getId());
+            itemSubcategory.setSubcategoryId(addItemForm.getSubcategoryId());
+            itemMapper.insertItemSubcategory(itemSubcategory);
+
+            ItemCategory itemCategory = new ItemCategory();
+            itemCategory.setItemId(item.getId());
+            itemCategory.setCategoryId(addItemForm.getCategoryId());
+            itemMapper.insertItemCategory(itemCategory);
+
+        }
+
+    }
+
+    @Test
+    void searchTest() {
+        ItemSearchDto itemSearchDto = new ItemSearchDto();
+//        itemMapper.selectItemJoinedByCondition(itemSearchDto);
+
+        itemSearchDto.setItemName("name");
+        itemSearchDto.setPage(null);
+        itemSearchDto.setPrice1(null);
+        itemSearchDto.setPrice2(null);
+        itemSearchDto.setQuantity1(null);
+        itemSearchDto.setQuantity2(null);
+        itemSearchDto.setBrandId1(null);
+        itemSearchDto.setCategoryId1(null);
+        itemSearchDto.setCategoryId2(null);
+
+        ItemSearchDto filteredItemSearchDto = itemService.filterValue(itemSearchDto);
+
+        System.out.println("filteredItemSearchDto = " + filteredItemSearchDto);
+
+        //full of params
+        List<ItemJoined> joinedList = itemMapper.selectItemJoinedByCondition(filteredItemSearchDto);
+        System.out.println("joinedList = " + joinedList);
 
     }
 

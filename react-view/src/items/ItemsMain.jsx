@@ -5,12 +5,26 @@ import ItemList from "./ItemList";
 import Buttons from "./Buttons";
 import Paging from "./Paging";
 import AddForm from "./AddForm";
+import itemList from "./ItemList";
 
 
 export const ItemsContext = createContext({
   dispatch: () => {
   }
 });
+
+const initialSearchState = {
+  brandId1: "",
+  categoryId1: "",
+  subcategoryId1: "",
+  quantity1: "",
+  quantity2: "",
+  price1: "",
+  price2: "",
+  itemName: "",
+  page: 1,
+
+};
 
 
 //액션 정의
@@ -24,6 +38,11 @@ export const actionObj = {
   warningToggle: "warningToggle",
   addToggle: "addToggle",
   updatePage: "updatePage",
+  changeSearchState: "changeSearchState",
+  setTotal: "setTotal",
+  setSearchState: "setSearchState",
+  setItemList: "setItemList",
+
 }
 
 //변수
@@ -31,14 +50,11 @@ const initState = {
   itemList: [],
   load: false,
   itemSelected: [],
-  brand: {},
-  subcategory: {},
-  category: {},
-  price: {},
-  quantity: {},
-  nameKor: {},
   modal: false,
   addModal: false,
+  searchState: initialSearchState,
+  total: 0,
+
 }
 
 const reducer = (state, action) => {
@@ -46,15 +62,14 @@ const reducer = (state, action) => {
     case actionObj.initialPage: {
       //reducer에서 ItemList 받아 오기
       const itemList = [...action.itemList]
-      console.log(itemList)
       return {
         ...state, itemList: itemList, load: true
       }
     }
 
-    //update 하기
-    case  actionObj.updatePage: {
-      return state;
+    case (actionObj.setTotal): {
+      console.log(action.total);
+      return {...state, total: action.total};
     }
 
     case actionObj.selectAllItems: {
@@ -85,9 +100,14 @@ const reducer = (state, action) => {
     }
 
     case actionObj.warningToggle: {
-
       return {
       ...state, modal: !action.modal
+      }
+    }
+
+    case actionObj.setItemList: {
+      return {
+        ...state, itemList: action.itemList,
       }
     }
 
@@ -99,6 +119,14 @@ const reducer = (state, action) => {
       }
     }
 
+    case actionObj.changeSearchState: {
+      return {
+        ...state, searchState: {...action.searchState},
+      }
+    }
+
+
+
     default:
       return state;
   }
@@ -108,9 +136,9 @@ const reducer = (state, action) => {
 const ItemsMain = () => {
   const [state, dispatch] = useReducer(reducer, initState);
 
-  const {itemList, load, itemSelected, brand, subcategory, category, price, quantity, nameKor, modal, addModal} = state;
+  const {itemList, load, itemSelected, brand, subcategory, category, price, quantity, nameKor, modal, addModal, searchState, total} = state;
   const values = {
-    dispatch, itemList, load, itemSelected, brand, subcategory, category, price, quantity, nameKor, modal, addModal
+    dispatch, itemList, load, itemSelected, brand, subcategory, category, price, quantity, nameKor, modal, addModal, searchState, total
   };
   //첫화면 렌더링
 

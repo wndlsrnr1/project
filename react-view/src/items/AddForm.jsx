@@ -95,7 +95,7 @@ const AddForm = () => {
   const onSubmitAddForm = (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-
+    console.log(formData);
     const errorsCreated = errorCheck(formData);
 
     //에러가 있으면

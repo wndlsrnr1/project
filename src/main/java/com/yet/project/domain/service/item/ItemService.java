@@ -9,10 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -160,48 +157,128 @@ public class ItemService {
     }
 
     public List<ItemJoined> getItemsByCondition(
-            Long id, Long quantity1, Long quantity2,
-            Long price1, Long price2, Long brandId,
-            Long categoryId, Long subcategoryId
+            ItemSearchDto itemSearchDto
     ) {
-        if ( id == null &&  quantity1 == null &&  quantity2 == null &&  price1 == null &&  price2 == null &&  brandId == null &&  categoryId == null &&  subcategoryId == null) {
-            List<Item> itemList = itemMapper.selectItemsLimit15();
 
-            Map<Long, Brand> itemBrandMap = itemDao.selectBrandByItemIds(itemList);
+        List<ItemJoined> joinedList = itemMapper.selectItemJoinedByCondition(itemSearchDto);
 
-            Map<Long, Subcategory> itemSubCategoryMap = itemDao.selectSubcategoryByItemIds(itemList);
-
-            Map<Long, Category> subcategoryCategoryMap = itemDao.selectCategoriesBySubcategoryIds(itemSubCategoryMap.values().stream().collect(Collectors.toList()));
-
-            Map<Long, ItemJoined> itemJoinedMap = new HashMap<>();
-
-            for (Item item : itemList) {
-                Long itemId = item.getId();
-                ItemJoined itemJoined = new ItemJoined();
-                itemJoined.setId(itemId);
-                itemJoined.setName(item.getName());
-                itemJoined.setNameKor(item.getNameKor());
-                itemJoined.setPrice(item.getPrice());
-                itemJoined.setQuantity(item.getQuantity());
-                if (itemBrandMap.containsKey(itemId) && itemBrandMap.get(itemId) != null) {
-                    itemJoined.setBrandNameKor(itemBrandMap.get(itemId).getNameKor());
-                }
-                if (itemSubCategoryMap.containsKey(itemId) && itemSubCategoryMap.get(itemId) != null) {
-                    Subcategory subcategory = itemSubCategoryMap.get(itemId);
-                    itemJoined.setSubcategoryNameKor(subcategory.getNameKor());
-                    if (subcategoryCategoryMap.containsKey(subcategory.getId()) && subcategoryCategoryMap.get(subcategory.getId()) != null) {
-                        itemJoined.setCategoryNameKor(subcategoryCategoryMap.get(itemSubCategoryMap.get(itemId).getId()).getNameKor());
-                    }
-                }
-
-                itemJoinedMap.put(itemId, itemJoined);
+        for (ItemJoined itemJoined : joinedList) {
+            String brandNameKor = itemMapper.selectBrandByBrandId(itemJoined.getBrandId()).getNameKor();
+            String categoryNameKor = itemMapper.selectCategoryById(itemJoined.getCategoryId()).getNameKor();
+            itemJoined.setBrandNameKor(brandNameKor);
+            itemJoined.setCategoryNameKor(categoryNameKor);
+            if (itemJoined.getSubcategoryId() != null) {
+                String subcategoryNameKor = itemMapper.selectSubcategoryById(itemJoined.getSubcategoryId()).getNameKor();
+                itemJoined.setSubcategoryNameKor(subcategoryNameKor);
             }
-
-            return new ArrayList<>(itemJoinedMap.values());
         }
 
         //조건 검색
-        return null;
+        return joinedList;
+    }
+
+    private ArrayList<ItemJoined> returnFirstPage() {
+        List<Item> itemList = itemMapper.selectItemsLimit15();
+
+        Map<Long, Brand> itemBrandMap = itemDao.selectBrandByItemIds(itemList);
+
+        Map<Long, Subcategory> itemSubCategoryMap = itemDao.selectSubcategoryByItemIds(itemList);
+
+        Map<Long, Category> subcategoryCategoryMap = itemDao.selectCategoriesBySubcategoryIds(itemSubCategoryMap.values().stream().collect(Collectors.toList()));
+
+        Map<Long, ItemJoined> itemJoinedMap = new LinkedHashMap<>();
+
+        for (Item item : itemList) {
+            Long itemId = item.getId();
+            ItemJoined itemJoined = new ItemJoined();
+            itemJoined.setId(itemId);
+            itemJoined.setName(item.getName());
+            itemJoined.setNameKor(item.getNameKor());
+            itemJoined.setPrice(item.getPrice());
+            itemJoined.setQuantity(item.getQuantity());
+            if (itemBrandMap.containsKey(itemId) && itemBrandMap.get(itemId) != null) {
+                itemJoined.setBrandNameKor(itemBrandMap.get(itemId).getNameKor());
+            }
+            if (itemSubCategoryMap.containsKey(itemId) && itemSubCategoryMap.get(itemId) != null) {
+                Subcategory subcategory = itemSubCategoryMap.get(itemId);
+                itemJoined.setSubcategoryNameKor(subcategory.getNameKor());
+                if (subcategoryCategoryMap.containsKey(subcategory.getId()) && subcategoryCategoryMap.get(subcategory.getId()) != null) {
+                    itemJoined.setCategoryNameKor(subcategoryCategoryMap.get(itemSubCategoryMap.get(itemId).getId()).getNameKor());
+                }
+            }
+
+            itemJoinedMap.put(itemId, itemJoined);
+        }
+
+        return new ArrayList<>(itemJoinedMap.values());
+    }
+
+    public ItemSearchDto filterValue(ItemSearchDto itemSearchDto) {
+
+        ItemSearchDto createdISD = new ItemSearchDto();
+        createdISD.setPerPage(15L);
+        createdISD.setPage(itemSearchDto.getPage());
+        createdISD.setItemName(itemSearchDto.getItemName());
+        createdISD.setQuantity2(itemSearchDto.getQuantity2());
+        createdISD.setQuantity1(itemSearchDto.getQuantity1());
+        createdISD.setPrice1(itemSearchDto.getPrice1());
+        createdISD.setPrice2(itemSearchDto.getPrice2());
+        createdISD.setId(itemSearchDto.getId());
+        createdISD.setBrandId1(itemSearchDto.getBrandId1());
+        createdISD.setBrandId2(itemSearchDto.getBrandId2());
+        createdISD.setCategoryId1(itemSearchDto.getCategoryId1());
+        createdISD.setCategoryId2(itemSearchDto.getCategoryId2());
+        createdISD.setSubcategoryId1(itemSearchDto.getSubcategoryId1());
+        createdISD.setSubcategoryId2(itemSearchDto.getSubcategoryId2());
+
+        if (itemSearchDto.getBrandId1() == null) {
+            createdISD.setBrandId1(0L);
+            createdISD.setBrandId2(Long.MAX_VALUE);
+        } else {
+            createdISD.setBrandId2(itemSearchDto.getBrandId1());
+        }
+
+        if (itemSearchDto.getCategoryId1() == null) {
+            createdISD.setCategoryId1(0L);
+            createdISD.setCategoryId2(Long.MAX_VALUE);
+        } else {
+            createdISD.setCategoryId2(itemSearchDto.getCategoryId1());
+        }
+
+        if (itemSearchDto.getSubcategoryId1() == null) {
+            createdISD.setSubcategoryId1(0L);
+            createdISD.setSubcategoryId2(Long.MAX_VALUE);
+        } else {
+            createdISD.setSubcategoryId2(itemSearchDto.getSubcategoryId1());
+        }
+
+        if (itemSearchDto.getItemName() == null) {
+            createdISD.setItemName("");
+        }
+
+        if (itemSearchDto.getPage() == null) {
+            createdISD.setPage(0L);
+        } else {
+            createdISD.setPage(itemSearchDto.getPage() * 15);
+        }
+
+        if (itemSearchDto.getQuantity1() == null) {
+            createdISD.setQuantity1(0L);
+        }
+
+        if (itemSearchDto.getQuantity2() == null) {
+            createdISD.setQuantity2(Long.MAX_VALUE);
+        }
+
+        if (itemSearchDto.getPrice1() == null) {
+            createdISD.setPrice1(0L);
+        }
+
+        if (itemSearchDto.getPrice2() == null) {
+            createdISD.setPrice2(Long.MAX_VALUE);
+        }
+        log.info("createdISD {}", createdISD);
+        return createdISD;
     }
 
     public boolean removeItemByItemId(Long itemId) {
@@ -260,5 +337,14 @@ public class ItemService {
     public Boolean isCategory(Long categoryId) {
         Category category = itemMapper.selectCategoryById(categoryId);
         return category != null;
+    }
+
+    public Long getTotalByCondition(ItemSearchDto itemSearchDto) {
+        List<ItemSearchDto> itemSearchDtoList = itemMapper.countItemsByValue(itemSearchDto);
+        if (itemSearchDtoList == null || itemSearchDtoList.isEmpty()) {
+            return 0L;
+        } else {
+            return (long) itemSearchDtoList.size();
+        }
     }
 }
