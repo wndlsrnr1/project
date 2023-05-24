@@ -2,10 +2,7 @@ package com.yet.project.web.controller.admin.item;
 
 import com.yet.project.web.controller.CommonRestControllerAdvice;
 import com.yet.project.web.dto.item.error_result.ItemErrorDto;
-import com.yet.project.web.exception.admin.item.ItemEmptyException;
-import com.yet.project.web.exception.admin.item.ItemMisMatchException;
-import com.yet.project.web.exception.admin.item.NoBrandListException;
-import com.yet.project.web.exception.admin.item.NoCategoryListException;
+import com.yet.project.web.exception.admin.item.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.MessageSource;
@@ -115,8 +112,12 @@ public class ItemRestControllerAdvice extends CommonRestControllerAdvice {
         return new ItemErrorDto(error, code, message);
     }
 
-
-
-
-
+    @ExceptionHandler(ItemUpdateFailException.class)
+    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+    public ItemErrorDto handleItemUpdateFailException(ItemUpdateFailException e) {
+        String error = getOnlyClassName(e);
+        Integer code = HttpStatus.INTERNAL_SERVER_ERROR.value();
+        String message = messageSource.getMessage("error.item_update_fail_exception", null, "error.item update fail exception", Locale.KOREA);
+        return new ItemErrorDto(error, code, message);
+    }
 }

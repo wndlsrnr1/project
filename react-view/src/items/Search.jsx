@@ -207,34 +207,5 @@ const Search = memo(() => {
         </Form>
       </div>
     );
-  })
-;
-
-// {
-//   "id": 138,
-//   "name": "name of item 5",
-//   "nameKor": "이름 5",
-//   "quantity": 1,
-//   "price": 1,
-//   "brandNameKor": "소니",
-//   "categoryNameKor": "소니",
-//   "subcategoryNameKor": "asdfasdfasdf",
-//   "brandId": 1,
-//   "categoryId": 36,
-//   "subcategoryId": 33
-// }
-
-// {
-//   "id": 133,
-//   "name": "name of item 0",
-//   "nameKor": "이름 0",
-//   "quantity": 1,
-//   "price": 1,
-//   "brandNameKor": "소니",
-//   "categoryNameKor": "소니",
-//   "subcategoryNameKor": "asdfasdfasdf",
-//   "brandId": 1,
-//   "categoryId": 36,
-//   "subcategoryId": 33
-// }
+  });
 export default Search;

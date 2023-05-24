@@ -1,6 +1,7 @@
 package com.yet.project.repository.mybatismapper.item;
 
 import com.yet.project.domain.item.*;
+import com.yet.project.web.dto.item.EditItemForm;
 import com.yet.project.web.dto.item.ItemJoined;
 import com.yet.project.web.dto.item.ItemSearchDto;
 import com.yet.project.web.dto.item.SubCategoryJoined;
@@ -104,6 +105,9 @@ public interface ItemMapper {
     @Update("UPDATE subcategory SET name=#{subcategory.name}, name_kor=#{subcategory.nameKor} WHERE id=#{subcategory.id}")
     void updateSubcategory(@Param("categoryId") Long categoryId, @Param("subcategory") Subcategory subcategory);
 
+    @Update("update subcategory set name=#{name}, name_kor = #{nameKor} where id = #{id}")
+    Boolean updateSubcategoryByObject(Subcategory subcategory);
+
     @Select("SELECT i.id, i.name, i.name_kor, i.quantity, i.price, b.name as brand_name, b.name_kor as brand_name_kor, s.name_kor as subcategory_name_kor, c.name_kor as category_name_kor " +
             "FROM item i " +
             "JOIN item_brand ib ON i.id = ib.item_id " +
@@ -155,8 +159,8 @@ public interface ItemMapper {
     @Select({
             "SELECT i.id, i.name, i.name_kor, i.price, i.quantity, item_s.subcategory_id, ib.brand_id, ic.category_id",
             "FROM item AS i",
-            "JOIN item_subcategory AS item_s ON i.id = item_s.item_id",
-            "JOIN item_brand AS ib ON ib.item_id = i.id",
+            "left JOIN item_subcategory AS item_s ON i.id = item_s.item_id",
+            "left JOIN item_brand AS ib ON ib.item_id = i.id",
             "left Join item_category as ic on ic.item_id = i.id",
             "WHERE 1=1",
             "AND item_s.subcategory_id >= #{subcategoryId1}",
@@ -169,16 +173,23 @@ public interface ItemMapper {
             "AND i.quantity <= #{quantity2}",
             "AND i.price >= #{price1}",
             "AND i.price <= #{price2}",
-            "AND (i.name LIKE CONCAT('%', #{itemName}, '%') OR i.name_kor LIKE CONCAT('%', #{itemName}, '%'))",
-            "ORDER BY i.id ASC LIMIT #{page}, #{perPage}",
+            "AND (",
+            "i.name LIKE CONCAT('%', #{itemName}, '%')",
+            "OR i.name LIKE CONCAT(#{itemName}, '%')",
+            "OR i.name LIKE CONCAT('%', #{itemName})",
+            "OR i.name_kor LIKE CONCAT('%', #{itemName}, '%')",
+            "OR i.name_kor LIKE CONCAT(#{itemName}, '%')",
+            "OR i.name_kor LIKE CONCAT('%', #{itemName})",
+            ")",
+            "ORDER BY i.id limit #{page}, #{perPage}"
     })
     List<ItemJoined> selectItemJoinedByCondition(ItemSearchDto itemSearchDto);
 
     @Select({
             "SELECT i.id, i.name, i.name_kor, i.price, i.quantity, item_s.subcategory_id, ib.brand_id, ic.category_id",
             "FROM item AS i",
-            "JOIN item_subcategory AS item_s ON i.id = item_s.item_id",
-            "JOIN item_brand AS ib ON ib.item_id = i.id",
+            "left JOIN item_subcategory AS item_s ON i.id = item_s.item_id",
+            "left JOIN item_brand AS ib ON ib.item_id = i.id",
             "left Join item_category as ic on ic.item_id = i.id",
             "WHERE 1=1",
             "AND item_s.subcategory_id >= #{subcategoryId1}",
@@ -191,9 +202,43 @@ public interface ItemMapper {
             "AND i.quantity <= #{quantity2}",
             "AND i.price >= #{price1}",
             "AND i.price <= #{price2}",
-            "AND (i.name LIKE CONCAT('%', #{itemName}, '%') OR i.name_kor LIKE CONCAT('%', #{itemName}, '%'))",
+            "AND (",
+            "i.name LIKE CONCAT('%', #{itemName}, '%')",
+            "OR i.name LIKE CONCAT(#{itemName}, '%')",
+            "OR i.name LIKE CONCAT('%', #{itemName})",
+            "OR i.name_kor LIKE CONCAT('%', #{itemName}, '%')",
+            "OR i.name_kor LIKE CONCAT(#{itemName}, '%')",
+            "OR i.name_kor LIKE CONCAT('%', #{itemName})",
+            ") limit 1000",
     })
     List<ItemSearchDto> countItemsByValue(ItemSearchDto filterValue);
+
+    @Select({
+            "select i.id, i.name, i.name_kor, i.price, i.quantity, ib.brand_id, ic.category_id, isc.subcategory_id ",
+            "from item as i",
+            "left join item_brand as ib on i.id = ib.item_id",
+            "left join item_category as ic on i.id = ic.item_id",
+            "left join item_subcategory as isc on i.id = isc.item_id",
+            "where i.id = #{itemId}"
+    })
+    EditItemForm selectForJoinedEditFormByItemId(Long itemId);
+
+    @Update("update item set name = #{name}, name_kor = #{nameKor}, price = #{price}, quantity = #{quantity} where id = #{id}")
+    void updateItemByItem(Item item);
+
+    @Update("update item_brand set brand_id = #{brandId} where item_id = #{itemId}")
+    void updateItemBrandByBrandId(ItemBrand itemBrand);
+
+    @Update("update item_category set category_id = #{categoryId} where item_id = #{itemId}")
+    void updateItemCategory(ItemCategory itemCategory);
+
+    @Update("update item_subcategory set subcategory_id = #{subcategoryId} where item_id = #{itemId}")
+    void updateItemSubcategory(ItemSubcategory itemSubcategory);
+
+    @Delete("delete from item_subcategory where itemId = #{itemId}")
+    void deleteItemSubcategory(ItemSubcategory itemSubcategory);
+
+
 
 
 

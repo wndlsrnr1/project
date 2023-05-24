@@ -1,11 +1,23 @@
 import React, {memo, useCallback, useContext, useEffect, useReducer, useRef} from "react";
-import {Input, Table} from "reactstrap";
+import {Input, NavLink, Table} from "reactstrap";
 import {ItemsContext, actionObj} from "./ItemsMain";
 import data from "bootstrap/js/src/dom/data";
+import EditForm from "./EditForm";
 
 
 const ItemList = memo(() => {
-  const {dispatch, itemList, load, itemSelected, searchState} = useContext(ItemsContext);
+  const {
+    dispatch,
+    itemList,
+    load,
+    itemSelected,
+    modal,
+    addModal,
+    searchState,
+    total,
+    editItemId,
+    editModal
+  } = useContext(ItemsContext);
 
   //변수확인
   useEffect(() => {
@@ -21,7 +33,7 @@ const ItemList = memo(() => {
 
   useEffect(() => {
     let formData = new FormData();
-    Object.keys(searchState).forEach(key=> {
+    Object.keys(searchState).forEach(key => {
       formData.append(key, searchState[key]);
     })
 
@@ -30,12 +42,12 @@ const ItemList = memo(() => {
       body: formData,
     }).then((response) => response.json())
       .then(data => {
-        console.log("data.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.totaldata.total       ", data.total);
         //검색 상태값 바꾸기
-        dispatch({type: actionObj.initialPage, itemList: data.itemList});
+        console.log(data);
+        dispatch({type: actionObj.initialPage, itemList: [...data.itemList]});
         dispatch({type: actionObj.setTotal, total: data.total});
       });
-  }, [searchState, load]);
+  }, [searchState]);
 
   const onClickInputs = (event) => {
     if (itemSelected.includes(parseInt(event.target.value))) {
@@ -43,6 +55,15 @@ const ItemList = memo(() => {
     } else {
       dispatch({type: actionObj.addInputElem, id: parseInt(event.target.value)});
     }
+  }
+
+  const onClickEditItem = (event) => {
+    event.preventDefault();
+    const itemIdName = event.target.id;
+    const itemId = parseInt(itemIdName.split("_")[1]);
+    console.log(itemId);
+    dispatch({type: actionObj.setEditItemId, editItemId: itemId});
+    dispatch({type: actionObj.editToggle, editModal: editModal});
   }
 
   return (
@@ -63,7 +84,7 @@ const ItemList = memo(() => {
         <tbody>
         {
           //배열 만들기
-          itemList.map((elem, index) => {
+          itemList.length !== 0 ? itemList.map((elem, index) => {
             return (
               <tr key={elem.id}>
                 <td>
@@ -71,7 +92,8 @@ const ItemList = memo(() => {
                          checked={itemSelected.includes(parseInt(elem.id))}/>
                 </td>
                 <td>{elem.id}</td>
-                <td>{elem.nameKor}</td>
+                <td><NavLink onClick={onClickEditItem} className={"p-0"} id={"item_" + elem.id}>{elem.nameKor}</NavLink>
+                </td>
                 <td>{elem.price}</td>
                 <td>{elem.quantity}</td>
                 <td>{elem.brandNameKor}</td>
@@ -79,9 +101,14 @@ const ItemList = memo(() => {
                 <td>{elem.subcategoryNameKor}</td>
               </tr>
             )
-          })
+          }) : <>
+            <tr>
+              <td colSpan={12}>검색 결과가 없습니다</td>
+            </tr>
+          </>
         }
         </tbody>
+        <EditForm/>
       </Table>
     </div>
   )

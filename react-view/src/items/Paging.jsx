@@ -14,7 +14,7 @@ const Paging = () => {
   const totalChunk = (total) => Math.ceil(Math.ceil(total / 15) / 5);
   const presentChunk = (page) => Math.floor((page - 1) / 5) + 1;
   const lestPage = (total, page) => {
-    return new Array(total % 5).fill().map((elem, index) => {
+    return new Array(totalChunk(total) % 5).fill().map((elem, index) => {
       return page + index;
     });
   }

@@ -22,7 +22,7 @@ const errorDefault = {
 
 const AddForm = () => {
 
-  const {addModal, dispatch} = useContext(ItemsContext);
+  const {addModal, dispatch, searchState} = useContext(ItemsContext);
   const [brands, setBrands] = useState([]);
   const [subcategories, setSubcategories] = useState({subcategoryList: []});
   const [categories, setCategories] = useState([]);
@@ -110,16 +110,17 @@ const AddForm = () => {
     }).then((response) => {
       if (!response.ok) {
         console.log("상품 추가에 실패했습니다.");
+        //data 초기화
       }
-    });
-    //data 초기화
-    setErrors(errorDefault)
-    setBrands([]);
-    setCategories([]);
-    setBrands([]);
+      setErrors(errorDefault)
+      setBrands([]);
+      setCategories([]);
+      setBrands([]);
 
-    dispatch({type: actionObj.updatePage});
-    dispatch({type: actionObj.addToggle, addModal: addModal});
+      dispatch({type: actionObj.changeSearchState, searchState: {...searchState}});
+      dispatch({type: actionObj.addToggle, addModal: addModal});
+    });
+
   }
 
   const onChangeCategory = useCallback((event) => {
@@ -144,7 +145,7 @@ const AddForm = () => {
       </Col>
       <Modal isOpen={addModal} size={"lg"}>
         <Form onSubmit={onSubmitAddForm} action={"/admin/items/add"} method={"post"}>
-          <ModalHeader closeButton hideCloseBUtton={true} className={"text-xs"}>상품 추가</ModalHeader>
+          <ModalHeader closeButton hideCloseButton={true} className={"text-xs"}>상품 추가</ModalHeader>
           <ModalBody className={"text-xxl"}>
             <FormGroup row className={"mb-3"}>
               <Label sm={2}>영어 이름</Label>

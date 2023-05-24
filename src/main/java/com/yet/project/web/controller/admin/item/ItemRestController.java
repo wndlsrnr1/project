@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.net.jsse.PEMFile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -52,8 +53,8 @@ public class ItemRestController {
         return itemPaging;
     }
 
-    @PostMapping("/delete")
-    ResponseEntity deleteItems(@RequestParam("itemIdList[]") List<Long> itemIdList) {
+    @PostMapping(value = "/delete", consumes = "application/json")
+    ResponseEntity deleteItems(@RequestBody List<Long> itemIdList) {
         //number format exception 예외처리 하기 O
 
         //잘 못된 key로 왔을때 예외 처리 하기 O
@@ -153,6 +154,27 @@ public class ItemRestController {
 
         //200
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/edit")
+    public ResponseEntity editItem(EditItemForm editItemForm) {
+
+
+        if (editItemForm.getId() == null || editItemForm.getName() == null || editItemForm.getNameKor() == null || editItemForm.getPrice() == null || editItemForm.getQuantity() == null || editItemForm.getBrandId() == null || editItemForm.getSubcategoryId() == null || editItemForm.getCategoryId() == null) {
+            throw new IllegalArgumentException();
+        }
+
+        itemService.editForJoinedItemEditFormByEditForm(editItemForm);
+        log.info("editItemForm {} ", editItemForm);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/get/{itemId}")
+    public EditItemForm getItem(@PathVariable Long itemId) {
+        log.info("itemId {}", itemId);
+        EditItemForm item = itemService.getJoinedForEditFormByItemId(itemId);
+        return item;
     }
 
 

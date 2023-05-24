@@ -4,10 +4,7 @@ import com.yet.project.domain.item.*;
 import com.yet.project.repository.dao.item.ItemDao;
 import com.yet.project.repository.mybatismapper.item.ItemMapper;
 import com.yet.project.service.AJ;
-import com.yet.project.web.dto.item.AddItemForm;
-import com.yet.project.web.dto.item.ItemJoined;
-import com.yet.project.web.dto.item.ItemSearchDto;
-import com.yet.project.web.dto.item.SubCategoryJoined;
+import com.yet.project.web.dto.item.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mybatis.spring.annotation.MapperScan;
@@ -22,7 +19,7 @@ import java.util.*;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @MapperScan("com.yet.project.repository.mybatismapper")
-//@Transactional
+@Transactional
 class ItemServiceDBTest {
 
     @Autowired
@@ -247,5 +244,21 @@ class ItemServiceDBTest {
         System.out.println("joinedList = " + joinedList);
 
     }
+
+    @Test
+    void getItemById() {
+        List<Item> itemList = itemMapper.selectItemsLimit15();
+        if (itemList != null && !itemList.isEmpty()) {
+            EditItemForm editItemForm = itemMapper.selectForJoinedEditFormByItemId(itemList.get(0).getId());
+            AJ.assertThat(editItemForm.getId()).isEqualTo(itemList.get(0).getId());
+        }
+    }
+
+    @Test
+    void insertCategory() {
+
+    }
+
+
 
 }

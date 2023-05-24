@@ -13,6 +13,7 @@ import javax.servlet.http.HttpSession;
 
 @Slf4j
 public class LoginInterceptor implements HandlerInterceptor {
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String requestURI = request.getRequestURI();
@@ -21,6 +22,10 @@ public class LoginInterceptor implements HandlerInterceptor {
         if (session == null || session.getAttribute(SessionConst.LOGIN_MEMBER) == null) {
             log.info("미인증 사용자 요청");
             response.sendRedirect("/login?requestURI=" + requestURI);
+            StringBuffer requestURL = request.getRequestURL();
+            log.info("requestURL {}", requestURL);
+            log.info("/login?requestURI=" + requestURI);
+            log.info("referer {}", request.getHeader("referer"));
             return false;
         }
         return true;

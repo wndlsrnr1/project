@@ -259,7 +259,7 @@ public class ItemService {
         if (itemSearchDto.getPage() == null) {
             createdISD.setPage(0L);
         } else {
-            createdISD.setPage(itemSearchDto.getPage() * 15);
+            createdISD.setPage((itemSearchDto.getPage() - 1) * 15);
         }
 
         if (itemSearchDto.getQuantity1() == null) {
@@ -346,5 +346,35 @@ public class ItemService {
         } else {
             return (long) itemSearchDtoList.size();
         }
+    }
+
+    public EditItemForm getJoinedForEditFormByItemId(Long itemId) {
+        return itemMapper.selectForJoinedEditFormByItemId(itemId);
+    }
+
+    public void editForJoinedItemEditFormByEditForm(EditItemForm editItemForm) {
+        Item item = new Item();
+        item.setId(editItemForm.getId());
+        item.setQuantity(editItemForm.getQuantity());
+        item.setPrice(editItemForm.getPrice());
+        item.setName(editItemForm.getName());
+        item.setNameKor(editItemForm.getNameKor());
+        itemMapper.updateItemByItem(item);
+
+        ItemBrand itemBrand = new ItemBrand();
+        itemBrand.setItemId(editItemForm.getId());
+        itemBrand.setBrandId(editItemForm.getBrandId());
+        itemMapper.updateItemBrandByBrandId(itemBrand);
+
+        ItemCategory itemCategory = new ItemCategory();
+        itemCategory.setItemId(editItemForm.getId());
+        itemCategory.setCategoryId(editItemForm.getCategoryId());
+        itemMapper.updateItemCategory(itemCategory);
+
+        ItemSubcategory itemSubcategory = new ItemSubcategory();
+        itemSubcategory.setItemId(editItemForm.getId());
+        itemSubcategory.setSubcategoryId(editItemForm.getSubcategoryId());
+        itemMapper.updateItemSubcategory(itemSubcategory);
+
     }
 }

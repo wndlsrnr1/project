@@ -1,0 +1,19 @@
+@Select({
+select i.id, i.name, i.name_kor, i.price, i.quantity, item_s.subcategory_id, ib.brand_id, ic.category_id
+from item as i
+left join item_subcategory as item_s on i.id = item_s.item_id
+left join item_brand as ib on ib.item_id = i.id
+left join item_category as ic on ic.item_id = i.id
+where 1=1
+and item_s.subcategory_id >= #{subcategory1}
+and item_s.subcategory_id <= #{subcategory2}
+and ib.brand_id >= #{brandId1}
+and ib.brand_id <= #{brandId2}
+and ic.category_id >= #{categoryId1}
+and ic.category_id <= #{categoryId2}
+and i.quantity >= #{quantity1}
+and i.quantity <= #{quantity2}
+and i.price >= #{price1}
+and i.price <= #{price2}
+and (i.name like concat('%', #{itemName}, '%') or i.name like concat('%', #{itemName}, '%') or i.name like concat('%', #{itemName}, '%') or i.name_kor like concat('%', #{itemName}, '%') or i.name like concat ('%', #{itemName}, '%') or )
+})
