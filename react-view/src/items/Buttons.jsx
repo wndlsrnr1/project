@@ -1,6 +1,7 @@
 import React, {memo, useCallback, useContext} from "react";
 import {Button, Col, Modal, ModalBody, ModalHeader, Row, ModalFooter, FormGroup, Input, Label, Form} from "reactstrap";
 import {actionObj, ItemsContext} from "./ItemsMain";
+import itemList from "./ItemList";
 
 const Buttons = memo(() => {
 
@@ -8,19 +9,29 @@ const Buttons = memo(() => {
     dispatch,
     itemList,
     load,
-    itemSelected,
-    brand,
-    subcategory,
-    category,
-    price,
-    quantity,
-    nameKor,
     modal,
-    addModal
+    addModal,
+    searchState,
+    itemSelected
   } = useContext(ItemsContext);
 
   const onClickDelete = () => {
-    return null
+    const itemIdList = Object.values(itemSelected);
+
+    fetch("/admin/items/delete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(itemIdList),
+    }).then(response => {
+      if (response.ok) {
+        warningToggle();
+        dispatch({type: actionObj.changeSearchState, searchState: {...searchState}});
+      } else {
+        warningToggle();
+      }
+    });
   }
 
   const onClickAdd = () => {
@@ -43,12 +54,8 @@ const Buttons = memo(() => {
             정말 데이터를 지우시겠습니까?
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" onClick={warningToggle}>
-              확인
-            </Button>{' '}
-            <Button color="secondary" onClick={warningToggle}>
-              취소
-            </Button>
+            <Button color="primary" onClick={onClickDelete}>확인</Button>{' '}
+            <Button color="secondary" onClick={warningToggle}>취소</Button>
           </ModalFooter>
         </Modal>
       </Col>

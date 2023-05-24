@@ -4,14 +4,15 @@ import com.yet.project.domain.item.Brand;
 import com.yet.project.domain.item.Category;
 import com.yet.project.domain.item.Subcategory;
 import com.yet.project.domain.service.item.ItemService;
-import com.yet.project.web.dto.item.AddItemForm;
-import com.yet.project.web.dto.item.ItemJoined;
-import com.yet.project.web.dto.item.SubcategoryDto;
+import com.yet.project.repository.mybatismapper.item.ItemMapper;
+import com.yet.project.web.dto.item.*;
 import com.yet.project.web.exception.admin.item.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.net.jsse.PEMFile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -21,25 +22,39 @@ import java.util.List;
 @Slf4j
 public class ItemRestController {
 
+    private final ItemMapper itemMapper;
     private final ItemService itemService;
 
     @GetMapping
-    List<ItemJoined> getItemsByValues(
-            @RequestParam(required = false) Long id,
-            @RequestParam(required = false) Long quantity1,
-            @RequestParam(required = false) Long quantity2,
-            @RequestParam(required = false) Long price1,
-            @RequestParam(required = false) Long price2,
-            @RequestParam(required = false) Long brandId,
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Long subcategoryId
+    ItemPaging firstPage(
+            ItemSearchDto itemSearchDto
     ) {
-        List<ItemJoined> ItemList = itemService.getItemsByCondition(id, quantity1, quantity2, price1, price2, brandId, categoryId, subcategoryId);
-        return ItemList;
+        ItemPaging itemPaging = new ItemPaging();
+        List<ItemJoined> itemList = itemService.getItemsByCondition(itemSearchDto);
+        Long total = itemService.getTotalByCondition(itemSearchDto);
+        itemPaging.setItemList(itemList);
+        itemPaging.setTotal(total);
+        return itemPaging;
     }
 
-    @PostMapping("/delete")
-    ResponseEntity deleteItems(@RequestParam("itemIdList[]") List<Long> itemIdList) {
+    @PostMapping
+    ItemPaging getItemsByValues(
+            ItemSearchDto itemSearchDto
+    ) {
+        log.info("itemSearchDto {}", itemSearchDto);
+        ItemPaging itemPaging = new ItemPaging();
+        ItemSearchDto filteredItemSearchDto = itemService.filterValue(itemSearchDto);
+        Long total = itemService.getTotalByCondition(filteredItemSearchDto);
+        List<ItemJoined> itemList = itemService.getItemsByCondition(filteredItemSearchDto);
+        log.info("total {}", total);
+        itemPaging.setItemList(itemList);
+        itemPaging.setTotal(total);
+        log.info("itemList {}", itemList);
+        return itemPaging;
+    }
+
+    @PostMapping(value = "/delete", consumes = "application/json")
+    ResponseEntity deleteItems(@RequestBody List<Long> itemIdList) {
         //number format exception 예외처리 하기 O
 
         //잘 못된 key로 왔을때 예외 처리 하기 O
@@ -130,6 +145,7 @@ public class ItemRestController {
             throw new SubcategoryMismatchException();
         }
 
+
         //202 옳은 요청이지만 실행되지 않음.
         Boolean added = itemService.addItem(addItemForm);
         if (!added) {
@@ -140,7 +156,33 @@ public class ItemRestController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/edit")
+    public ResponseEntity editItem(EditItemForm editItemForm) {
 
+
+        if (editItemForm.getId() == null || editItemForm.getName() == null || editItemForm.getNameKor() == null || editItemForm.getPrice() == null || editItemForm.getQuantity() == null || editItemForm.getBrandId() == null || editItemForm.getSubcategoryId() == null || editItemForm.getCategoryId() == null) {
+            throw new IllegalArgumentException();
+        }
+
+        itemService.editForJoinedItemEditFormByEditForm(editItemForm);
+        log.info("editItemForm {} ", editItemForm);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/get/{itemId}")
+    public EditItemForm getItem(@PathVariable Long itemId) {
+        log.info("itemId {}", itemId);
+        EditItemForm item = itemService.getJoinedForEditFormByItemId(itemId);
+        return item;
+    }
+
+
+//    @GetMapping
+//    public List<ItemJoined> responsePageByParam(ItemSearchDto itemSearchDto) {
+//        List<ItemJoined> itemList = itemService.getItemsByCondition(itemSearchDto);
+//        return itemList;
+//    }
 
 
 }

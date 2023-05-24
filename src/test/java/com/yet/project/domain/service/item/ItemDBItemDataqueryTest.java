@@ -55,19 +55,6 @@ public class ItemDBItemDataqueryTest {
 //        itemDao.saveSubcategoryCategory(subcategoryCategory);
     }
 
-    @Test
-    void ItemInsertTest() {
-        for (int i = 0; i < 100; i++) {
-            ItemInsertForm itemInsertForm = new ItemInsertForm();
-            itemInsertForm.setName("name of item" + i);
-            itemInsertForm.setNameKor("아이템 이름" + i);
-            itemInsertForm.setBrandId(itemMapper.selectBrandsAll().get(0).getId());
-            itemInsertForm.setSubcategoryId(itemMapper.selectSubCategoryAll().get(0).getSubcategoryId());
-            itemInsertForm.setPrice(123124L + i);
-            itemInsertForm.setQuantity(123123L + i);
-            itemService.addItemDpreciated(itemInsertForm);
-        }
-    }
 
     @Test
     void ItemRemoveTest() {
