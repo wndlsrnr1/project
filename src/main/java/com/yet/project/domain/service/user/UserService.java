@@ -2,25 +2,20 @@ package com.yet.project.domain.service.user;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yet.project.domain.service.login.AntMatcher;
 import com.yet.project.domain.service.login.LoginAuth;
 import com.yet.project.domain.user.UserKakao;
 import com.yet.project.domain.user.User;
 import com.yet.project.domain.user.UserSocialLogin;
 import com.yet.project.repository.dao.user.UserDao;
 import com.yet.project.web.dto.login.*;
-import com.yet.project.web.interceptor.AddPatternConstant;
-import com.yet.project.web.sessionconst.SessionConst;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +29,6 @@ public class UserService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final LoginAuth loginAuth;
-    private final AntMatcher antMatcher;
 
     public void userJoin(BasicJoinForm join) {
         User user = new User();
@@ -155,22 +149,4 @@ public class UserService {
         User user = loginAuth.authUserByLoginForm(form);
         return user;
     }
-
-    public boolean authenticateReactURI(HttpSession session, String uri) {
-        //인증 실패
-        if (session == null || session.getAttribute(SessionConst.LOGIN_MEMBER) == null){
-            List<String> patterns = AddPatternConstant.getList();
-            for (String p : patterns) {
-                if (antMatcher.match(p, uri)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-
-
-        return true;
-    }
-
 }
