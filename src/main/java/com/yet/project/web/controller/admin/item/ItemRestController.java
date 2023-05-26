@@ -2,6 +2,7 @@ package com.yet.project.web.controller.admin.item;
 
 import com.yet.project.domain.item.Brand;
 import com.yet.project.domain.item.Category;
+import com.yet.project.domain.item.ItemImage;
 import com.yet.project.domain.item.Subcategory;
 import com.yet.project.domain.service.item.ItemService;
 import com.yet.project.repository.mybatismapper.item.ItemMapper;
@@ -9,11 +10,11 @@ import com.yet.project.web.dto.item.*;
 import com.yet.project.web.exception.admin.item.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.net.jsse.PEMFile;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -21,6 +22,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class ItemRestController {
+
+    @Value("${file.dir}")
+    String fileDir;
 
     private final ItemMapper itemMapper;
     private final ItemService itemService;
@@ -113,7 +117,7 @@ public class ItemRestController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity addItem(AddItemForm addItemForm) {
+    public ResponseEntity addItem(AddItemForm addItemForm) throws IOException {
         if (addItemForm == null) {
             throw new IllegalArgumentException();
         }
@@ -128,6 +132,22 @@ public class ItemRestController {
         if (name == null || nameKor == null || price == null || quantity == null || brandId == null || categoryId == null) {
             throw new IllegalArgumentException();
         }
+        List<Image> storedImages = null;
+        if (addItemForm.getImages() != null) {
+            storedImages = itemService.storeImageFiles(addItemForm);
+        }
+
+        List<Image> savedImages = null;
+        if (storedImages != null) {
+            savedImages = itemService.saveImages(storedImages);
+        }
+
+        if (savedImages != null) {
+            ItemImage itemImage = new ItemImage();
+            Long itemId = itemImage.getItemId();
+            List<ItemImage> result = itemService.saveItemImage(itemId, savedImages);
+        }
+
 
         if (price < 0 || quantity < 0) {
             throw new IllegalArgumentException();
@@ -156,9 +176,9 @@ public class ItemRestController {
         return ResponseEntity.ok().build();
     }
 
+
     @PostMapping("/edit")
     public ResponseEntity editItem(EditItemForm editItemForm) {
-
 
         if (editItemForm.getId() == null || editItemForm.getName() == null || editItemForm.getNameKor() == null || editItemForm.getPrice() == null || editItemForm.getQuantity() == null || editItemForm.getBrandId() == null || editItemForm.getSubcategoryId() == null || editItemForm.getCategoryId() == null) {
             throw new IllegalArgumentException();

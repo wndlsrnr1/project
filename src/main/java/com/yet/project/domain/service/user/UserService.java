@@ -2,7 +2,6 @@ package com.yet.project.domain.service.user;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yet.project.domain.service.login.AntMatcher;
 import com.yet.project.domain.service.login.LoginAuth;
 import com.yet.project.domain.user.UserKakao;
 import com.yet.project.domain.user.User;
@@ -34,7 +33,7 @@ public class UserService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final LoginAuth loginAuth;
-    private final AntMatcher antMatcher;
+    private final AntPathMatcher antPathMatcher;
 
     public void userJoin(BasicJoinForm join) {
         User user = new User();
@@ -161,7 +160,7 @@ public class UserService {
         if (session == null || session.getAttribute(SessionConst.LOGIN_MEMBER) == null){
             List<String> patterns = AddPatternConstant.getList();
             for (String p : patterns) {
-                if (antMatcher.match(p, uri)) {
+                if (antPathMatcher.match(p, uri)) {
                     return false;
                 }
             }

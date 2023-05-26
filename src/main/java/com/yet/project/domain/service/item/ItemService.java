@@ -8,7 +8,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -376,5 +379,37 @@ public class ItemService {
         itemSubcategory.setSubcategoryId(editItemForm.getSubcategoryId());
         itemMapper.updateItemSubcategory(itemSubcategory);
 
+    }
+
+    public List<Image> storeImageFiles(AddItemForm addItemForm) throws IOException {
+        List<Image> imageList = new ArrayList<>();
+        List<MultipartFile> images = addItemForm.getImages();
+        for (MultipartFile image : images) {
+            String originalFilename = image.getOriginalFilename();
+            image.transferTo(new File("aa"));
+        }
+        return imageList;
+    }
+
+
+    public List<Image> saveImages(List<Image> storedImages) {
+        List<Image> result = new ArrayList<>();
+        for (Image storedImage : storedImages) {
+            String extention = storedImage.getExtention();
+            String uuid = storedImage.getUuid();
+            String name = storedImage.getName();
+            Image image = itemMapper.insertImage(storedImage);
+            result.add(image);
+        }
+        return result;
+    }
+
+    public List<ItemImage> saveItemImage(Long itemId, List<Image> savedImages) {
+        ArrayList<ItemImage> itemImages = new ArrayList<>();
+        for (Image savedImage : savedImages) {
+            ItemImage itemImage = itemMapper.insertItemImage(itemId, savedImage.getId());
+            itemImages.add(itemImage);
+        }
+        return itemImages;
     }
 }

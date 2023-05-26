@@ -1,10 +1,7 @@
 package com.yet.project.repository.mybatismapper.item;
 
 import com.yet.project.domain.item.*;
-import com.yet.project.web.dto.item.EditItemForm;
-import com.yet.project.web.dto.item.ItemJoined;
-import com.yet.project.web.dto.item.ItemSearchDto;
-import com.yet.project.web.dto.item.SubCategoryJoined;
+import com.yet.project.web.dto.item.*;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -237,6 +234,13 @@ public interface ItemMapper {
 
     @Delete("delete from item_subcategory where itemId = #{itemId}")
     void deleteItemSubcategory(ItemSubcategory itemSubcategory);
+
+    @Insert("insert into image (uuid, name, extention) values (#{uuid}, #{name}, #{extention})")
+    @Options(useGeneratedKeys = true, keyProperty = "uid")
+    Image insertImage(Image storedImage);
+
+    @Insert("insert into item_image (item_id, image_id) values (#{itemId}, #{imageId})")
+    ItemImage insertItemImage(Long itemId, Long imageId);
 
 
 

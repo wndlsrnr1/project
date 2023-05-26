@@ -1,6 +1,9 @@
 package com.yet.project.web.dto.item;
 
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Data
 public class AddItemForm {
@@ -11,4 +14,5 @@ public class AddItemForm {
     Long brandId;
     Long categoryId;
     Long subcategoryId;
+    List<MultipartFile> images;
 }

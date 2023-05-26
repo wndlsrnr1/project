@@ -8,6 +8,7 @@ import com.yet.project.web.interceptor.LoginInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -26,6 +27,10 @@ public class AppConfig implements WebMvcConfigurer {
         return new RestTemplate();
     }
 
+    @Bean
+    AntPathMatcher antPathMatcher(){
+        return new AntPathMatcher();
+    }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
