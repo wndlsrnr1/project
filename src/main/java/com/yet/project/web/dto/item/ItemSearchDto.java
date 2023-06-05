@@ -3,18 +3,18 @@ import lombok.Data;
 
 @Data
 public class ItemSearchDto {
-    Long id;
-    Long brandId1;
-    Long brandId2;
-    Long categoryId1;
-    Long categoryId2;
-    Long subcategoryId1;
-    Long subcategoryId2;
-    Long quantity1;
-    Long quantity2;
-    Long price1;
-    Long price2;
-    String itemName;
-    Long page;
-    Long perPage;
+    private Long id;
+    private Long brandId1;
+    private Long brandId2;
+    private Long categoryId1;
+    private Long categoryId2;
+    private Long subcategoryId1;
+    private Long subcategoryId2;
+    private Long quantity1;
+    private Long quantity2;
+    private Long price1;
+    private Long price2;
+    private String itemName;
+    private Long page;
+    private Long perPage;
 }

@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class Image {
-    Long id;
-    String name;
-    String uuid;
-    String extention;
+    private Long id;
+    private String name;
+    private String uuid;
+    private String extention;
 }

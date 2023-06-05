@@ -4,6 +4,7 @@ import com.yet.project.domain.item.*;
 import com.yet.project.repository.dao.item.ItemDao;
 import com.yet.project.repository.mybatismapper.item.ItemMapper;
 import com.yet.project.web.dto.item.*;
+import com.yet.project.web.dto.request.item.AddItemForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class UpdateSubcategory {
-    Long categoryId;
-    Long id;
-    String name;
-    String nameKor;
+    private Long categoryId;
+    private Long id;
+    private String name;
+    private String nameKor;
 }

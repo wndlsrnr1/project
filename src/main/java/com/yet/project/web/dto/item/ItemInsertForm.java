@@ -4,11 +4,11 @@ import lombok.Data;
 
 @Data
 public class ItemInsertForm {
-    Long id;
-    String name;
-    String nameKor;
-    Long brandId;
-    Long subcategoryId;
-    Long price;
-    Long quantity;
+    private Long id;
+    private String name;
+    private String nameKor;
+    private Long brandId;
+    private Long subcategoryId;
+    private Long price;
+    private Long quantity;
 }

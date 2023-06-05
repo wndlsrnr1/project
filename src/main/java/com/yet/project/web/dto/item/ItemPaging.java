@@ -6,6 +6,6 @@ import java.util.List;
 
 @Data
 public class ItemPaging {
-    List<ItemJoined> itemList;
-    Long total;
+    private List<ItemJoined> itemList;
+    private Long total;
 }

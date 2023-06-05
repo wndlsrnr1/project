@@ -4,12 +4,12 @@ import lombok.Data;
 
 @Data
 public class EditItemForm {
-    Long id;
-    String name;
-    String nameKor;
-    Long price;
-    Long quantity;
-    Long brandId;
-    Long categoryId;
-    Long subcategoryId;
+    private Long id;
+    private String name;
+    private String nameKor;
+    private Long price;
+    private Long quantity;
+    private Long brandId;
+    private Long categoryId;
+    private Long subcategoryId;
 }
