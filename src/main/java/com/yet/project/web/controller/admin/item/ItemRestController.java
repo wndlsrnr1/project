@@ -129,7 +129,7 @@ public class ItemRestController {
 
     @PostMapping("/add")
     public ResponseEntity addItem(@Validated @NotNull(message = "{NotNull}") AddItemForm addItemForm, BindingResult bindingResult) throws IOException {
-
+        log.info("bindingResult {}", bindingResult);
         if (bindingResult.hasErrors()) {
             return APIResponseEntity.bindingError(bindingResult);
         }
@@ -169,11 +169,11 @@ public class ItemRestController {
 
 
     @PostMapping("/edit")
-    public ResponseEntity editItem(EditItemForm editItemForm) throws IOException {
+    public ResponseEntity editItem(@Validated EditItemForm editItemForm, BindingResult bindingResult) throws IOException {
 
-//        if (editItemForm.getId() == null || editItemForm.getName() == null || editItemForm.getNameKor() == null || editItemForm.getPrice() == null || editItemForm.getQuantity() == null || editItemForm.getBrandId() == null || editItemForm.getSubcategoryId() == null || editItemForm.getCategoryId() == null) {
-//            throw new IllegalArgumentException();
-//        }
+        if (bindingResult.hasErrors()) {
+            return APIResponseEntity.bindingError(bindingResult);
+        }
 
         itemService.editForJoinedItemEditFormByEditForm(editItemForm);
 

@@ -11,11 +11,9 @@ import java.util.List;
 
 @Data
 public class AddItemForm {
-    @NotNull(message = "{NotNull.name}")
     @NotEmpty(message = "{NotEmpty.name}")
     private String name;
 
-    @NotNull(message = "{NotNull.nameKor}")
     @NotEmpty(message = "{NotEmpty.nameKor}")
     private String nameKor;
 

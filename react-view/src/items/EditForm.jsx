@@ -26,41 +26,9 @@ const EditForm = () => {
   const [itemData, setItemData] = useState(editFormObjDefault);
   const [imageList, setImageList] = useState([]);
   const [deleteImageList, setDeleteImageList] = useState([]);
+  const [fieldError, setFieldError] = useState({});
 
-
-  // const errorCheck = (data) => {
-  //   const errors = {...errorDefault};
-  //
-  //   Object.keys(data).forEach((key, index) => {
-  //     let value = data[key];
-  //     if (value == null || !value || value === -1) {
-  //       errors.hasError = true;
-  //       errors[key] = true;
-  //       errors[key + "Message"] = key + " can not be null";
-  //       return;
-  //     }
-  //
-  //     if (key === "price" || key === "quantity") {
-  //       if (Number.isNaN(value)) {
-  //         errors.hasError = true;
-  //         errors[key] = true;
-  //         errors[key + "Message"] = key + " can not be string";
-  //         return;
-  //       }
-  //
-  //       if (parseInt(value) < 0) {
-  //         errors.hasError = true;
-  //         errors[key] = true;
-  //         errors[key + "Message"] = key + " can not be less than 0";
-  //       }
-  //     }
-  //   });
-  //
-  //   return errors;
-  // }
-
-  const onClickCancel = () => {
-    dispatch({type: actionObj.editToggle, editModal: editModal});
+  const resetValues = () => {
     dispatch({type: actionObj.setEditItemId, editItemId: -1});
     setItemData(editFormObjDefault);
     setCategories([]);
@@ -68,17 +36,16 @@ const EditForm = () => {
     setSubcategories([]);
     setDeleteImageList([]);
     setImageList([]);
+    setFieldError({});
   }
 
+  const onClickCancel = () => {
+    dispatch({type: actionObj.editToggle, editModal: editModal});
+    resetValues();
+  }
 
   const onSubmitEditForm = (event) => {
     event.preventDefault();
-
-    // const errorObj = errorCheck(itemData);
-    // if (errorObj.hasError) {
-    //   setErrors(errorObj);
-    //   return;
-    // }
 
     let formData = new FormData(event.target);
     formData.append("id", itemData.id);
@@ -94,8 +61,13 @@ const EditForm = () => {
         dispatch({type: actionObj.editToggle, editModal: editModal});
         dispatch({type: actionObj.setEditItemId, editItemId: -1});
         console.log("성공");
-      } else {
-        console.log("실패");
+        resetValues();
+
+      } else if (response.status === 400) {
+        response.json().then(data => {
+          setFieldError(data.fieldErrors);
+          console.log(data.fieldErrors);
+        });
       }
     });
   }
@@ -192,11 +164,6 @@ const EditForm = () => {
   };
 
   const onClickDeleteImage = (name) => {
-    // async function deleteImage() {
-    //   const response = await (await fetch("/images/delete/" + name)).json();
-    //
-    // }
-    console.log(name);
     const updatedImageList = imageList.filter(elem => {
       if (elem.uuid !== name) {
         return true
@@ -223,16 +190,16 @@ return (
           <Label sm={2}>영어 이름</Label>
           <Col sm={10}>
             <Input name={"name"} value={itemData.name} onChange={onChangeInput}/>
-            {/*{errors.name ? <Alert sm={10} color={"danger"} size={"sm"}*/}
-            {/*                      className={"mt-2 p-1 mb-0 ps-3"}>{errors.nameMessage}</Alert> : null}*/}
+            {fieldError.name ? <Alert sm={10} color={"danger"} size={"sm"}
+                                  className={"mt-2 p-1 mb-0 ps-3"}>{fieldError.name}</Alert> : null}
           </Col>
         </FormGroup>
         <FormGroup row className={"mb-3"}>
           <Label sm={2}>한글 이름</Label>
           <Col sm={10}>
             <Input name={"nameKor"} value={itemData.nameKor} onChange={onChangeInput}/>
-            {/*{errors.nameKor ? <Alert sm={10} color={"danger"} size={"sm"}*/}
-            {/*                         className={"mt-2 p-1 mb-0 ps-3"}>{errors.nameKorMessage}</Alert> : null}*/}
+            {fieldError.nameKor ? <Alert sm={10} color={"danger"} size={"sm"}
+                                      className={"mt-2 p-1 mb-0 ps-3"}>{fieldError.nameKor}</Alert> : null}
           </Col>
 
         </FormGroup>
@@ -240,16 +207,16 @@ return (
           <Label sm={2}>가격</Label>
           <Col sm={10}>
             <Input name={"price"} type={"number"} value={itemData.price} onChange={onChangeInput}/>
-            {/*{errors.price ? <Alert sm={10} color={"danger"} size={"sm"}*/}
-            {/*                       className={"mt-2 p-1 mb-0 ps-3"}>{errors.priceMessage}</Alert> : null}*/}
+            {fieldError.price ? <Alert sm={10} color={"danger"} size={"sm"}
+                                         className={"mt-2 p-1 mb-0 ps-3"}>{fieldError.price}</Alert> : null}
           </Col>
         </FormGroup>
         <FormGroup row className={"mb-3"}>
           <Label sm={2}>수량</Label>
           <Col sm={10}>
             <Input name={"quantity"} type={"number"} value={itemData.quantity} onChange={onChangeInput}/>
-            {/*{errors.quantity ? <Alert sm={10} color={"danger"} size={"sm"}*/}
-            {/*                          className={"mt-2 p-1 mb-0 ps-3"}>{errors.quantityMessage}</Alert> : null}*/}
+            {fieldError.quantity ? <Alert sm={10} color={"danger"} size={"sm"}
+                                       className={"mt-2 p-1 mb-0 ps-3"}>{fieldError.quantity}</Alert> : null}
           </Col>
 
         </FormGroup>

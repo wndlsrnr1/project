@@ -22,24 +22,24 @@ public class CommonRestControllerAdvice {
         this.messageSource = messageSource;
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
-    public CommonErrorResult runtimeException(Exception e) {
-        System.out.println("CommonRestControllerAdvice.runtimeException");
-        String name = e.getClass().getName();
-        Integer code = HttpStatus.INTERNAL_SERVER_ERROR.value();
-        String message = messageSource.getMessage("error.runtime_exception", null, "runtime exception", Locale.KOREA);
-        return new CommonErrorResult(name, code, message);
-    }
+//    @ExceptionHandler(RuntimeException.class)
+//    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+//    public CommonErrorResult runtimeException(Exception e) {
+//        System.out.println("CommonRestControllerAdvice.runtimeException");
+//        String name = e.getClass().getName();
+//        Integer code = HttpStatus.INTERNAL_SERVER_ERROR.value();
+//        String message = messageSource.getMessage("error.runtime_exception", null, "runtime exception", Locale.KOREA);
+//        return new CommonErrorResult(name, code, message);
+//    }
 
     //잡히지 않는 오류
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
-    public CommonErrorResult uncaughtErrorException(Exception e) {
-        System.out.println("CommonRestControllerAdvice.uncaughtErrorException");
-        String name = e.getClass().getName();
-        String message = messageSource.getMessage("error.uncaught_exception", null, "uncaught exception", Locale.KOREA);
-        Integer code = HttpStatus.INTERNAL_SERVER_ERROR.value();
-        return new CommonErrorResult(name, code, message);
-    }
+//    @ExceptionHandler(Exception.class)
+//    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+//    public CommonErrorResult uncaughtErrorException(Exception e) {
+//        System.out.println("CommonRestControllerAdvice.uncaughtErrorException");
+//        String name = e.getClass().getName();
+//        String message = messageSource.getMessage("error.uncaught_exception", null, "uncaught exception", Locale.KOREA);
+//        Integer code = HttpStatus.INTERNAL_SERVER_ERROR.value();
+//        return new CommonErrorResult(name, code, message);
+//    }
 }

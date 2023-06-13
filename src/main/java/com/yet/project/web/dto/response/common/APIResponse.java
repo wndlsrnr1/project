@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -34,6 +35,8 @@ public class APIResponse<T> {
         List<FieldError> fieldErrorList = bindingResult.getFieldErrors();
         Map<String, String> rejectedValues = new HashMap<>();
         Map<String, String> errorMessages = new HashMap<>();
+
+
         for (FieldError fieldError : fieldErrorList) {
 
             String field = fieldError.getField();
@@ -44,7 +47,8 @@ public class APIResponse<T> {
             if (rejectedValue == null) {
                 rejectedValues.put(field, "");
             } else {
-                rejectedValues.put(field, (String) rejectedValue);
+                String message = StringUtils.quoteIfString(rejectedValue).toString();
+                rejectedValues.put(field, message);
             }
 
             //set Messages

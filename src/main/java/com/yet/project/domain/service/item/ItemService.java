@@ -383,16 +383,6 @@ public class ItemService {
 
     }
 
-    public List<Image> storeImageFiles(AddItemForm addItemForm) throws IOException {
-        List<Image> imageList = new ArrayList<>();
-        List<MultipartFile> images = addItemForm.getImages();
-        for (MultipartFile image : images) {
-            String originalFilename = image.getOriginalFilename();
-            image.transferTo(new File("aa"));
-        }
-        return imageList;
-    }
-
     public Map<String, String> storeImages(List<MultipartFile> images, String fileDir) throws IOException {
         Map<String, String> map = new HashMap<>();
         for (MultipartFile image : images) {

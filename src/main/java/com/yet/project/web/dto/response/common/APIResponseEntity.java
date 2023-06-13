@@ -38,7 +38,7 @@ public class APIResponseEntity extends ResponseEntity {
     }
 
     public static APIResponseEntity bindingError(BindingResult bindingResult) {
-        return APIResponseEntity.builder().body(APIResponse.bindingError(bindingResult)).httpStatus(HttpStatus.OK).build();
+        return APIResponseEntity.builder().body(APIResponse.bindingError(bindingResult)).httpStatus(HttpStatus.BAD_REQUEST).build();
     }
 
 
