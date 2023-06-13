@@ -28,10 +28,10 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String requestURI = request.getRequestURI();
-        log.info("인증 체크 인터셉터 실행 {}", requestURI);
+        //log.info("인증 체크 인터셉터 실행 {}", requestURI);
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute(SessionConst.LOGIN_MEMBER) == null) {
-            log.error("미인증 사용자 요청");
+            //log.error("미인증 사용자 요청");
             if (request.getHeader("referer") == null) {
                 response.sendRedirect("/login?requestURI=" + requestURI);
                 return false;

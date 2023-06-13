@@ -1,6 +1,7 @@
 package com.yet.project.web.dto.request.item;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,24 +20,22 @@ public class AddItemForm {
     private String nameKor;
 
     @NotNull(message = "{NotNull.price}")
-    @NotEmpty(message = "{NotEmpty.price}")
+    @Range(min = 1, max = Integer.MAX_VALUE, message = "1 이상 이어야합니다.")
     private Long price;
 
     @NotNull(message = "{NotNull.quantity}")
-    @NotEmpty(message = "{NotEmpty.quantity}")
+    @Range(min = 1, max = Integer.MAX_VALUE, message = "1 이상 이어야합니다.")
     private Long quantity;
 
     @NotNull(message = "{NotNull.brandId}")
-    @NotEmpty(message = "{NotEmpty.brandId}")
     private Long brandId;
 
     @NotNull(message = "{NotNull.categoryId}")
-    @NotEmpty(message = "{NotEmpty.categoryId}")
     private Long categoryId;
 
     @NotNull(message = "{NotNull.subcategoryId}")
-    @NotEmpty(message = "{NotEmpty.subcategoryId}")
     private Long subcategoryId;
 
     private List<MultipartFile> images;
+
 }

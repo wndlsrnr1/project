@@ -27,6 +27,7 @@ const AddForm = () => {
   const [subcategories, setSubcategories] = useState({subcategoryList: []});
   const [categories, setCategories] = useState([]);
   const [errors, setErrors] = useState(errorDefault);
+  const [images, setImages] = useState([]);
 
   //get Initial Data
   useEffect(() => {
@@ -116,6 +117,7 @@ const AddForm = () => {
       setBrands([]);
       setCategories([]);
       setBrands([]);
+      setImages([]);
 
       dispatch({type: actionObj.changeSearchState, searchState: {...searchState}});
       dispatch({type: actionObj.addToggle, addModal: addModal});
@@ -138,13 +140,23 @@ const AddForm = () => {
 
   }, [categories]);
 
+  const limitFileMax = (event) => {
+    const images = event.target.files;
+    if (images.length > 3) {
+      event.target.value = '';
+      setImages([]);
+      return;
+    }
+    setImages([...images]);
+  }
+
   return (
     <Row>
       <Col>
         <Button color={"primary"} className={"btn float-end"} type={"button"} onClick={addToggle}>상품 등록</Button>
       </Col>
       <Modal isOpen={addModal} size={"lg"}>
-        <Form onSubmit={onSubmitAddForm} action={"/admin/items/add"} method={"post"}>
+        <Form onSubmit={onSubmitAddForm} action={"/admin/items/add"} method={"post"} encType={"multipart/form-data"}>
           <ModalHeader closeButton hideCloseButton={true} className={"text-xs"}>상품 추가</ModalHeader>
           <ModalBody className={"text-xxl"}>
             <FormGroup row className={"mb-3"}>
@@ -212,6 +224,17 @@ const AddForm = () => {
                   }
                 </Input>
               </Col>
+            </FormGroup>
+            <FormGroup>
+              <Label sm={2}>이미지 업로드</Label>
+              <Input
+                id="image_upload"
+                name="images"
+                type="file"
+                accept="image/png, image/jpeg"
+                multiple={true}
+                onChange={limitFileMax}
+              />
             </FormGroup>
           </ModalBody>
           <ModalFooter>
