@@ -1,6 +1,7 @@
 package com.yet.project.repository.dao.item;
 
 import com.yet.project.domain.item.*;
+import com.yet.project.web.dto.item.Image;
 import com.yet.project.web.dto.item.ItemJoined;
 import com.yet.project.web.dto.item.SubCategoryJoined;
 
@@ -56,4 +57,5 @@ public interface ItemDao {
     Boolean deleteItemByItemId(Long itemId);
 
     List<Subcategory> selectSubcategoryByCategoryId(Long categoryId);
+
 }

@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class SubCategoryJoined {
-    Long subcategoryId;
-    Long categoryId;
-    String name;
-    String nameKor;
+    private Long subcategoryId;
+    private Long categoryId;
+    private String name;
+    private String nameKor;
 }

@@ -3,18 +3,29 @@ package com.yet.project.web.controller.admin.item;
 import com.yet.project.domain.item.Brand;
 import com.yet.project.domain.item.Category;
 import com.yet.project.domain.item.Subcategory;
+import com.yet.project.domain.service.common.Util;
 import com.yet.project.domain.service.item.ItemService;
 import com.yet.project.repository.mybatismapper.item.ItemMapper;
 import com.yet.project.web.dto.item.*;
+import com.yet.project.web.dto.request.item.AddItemForm;
+import com.yet.project.web.dto.response.common.APIResponseEntity;
+import com.yet.project.web.dto.response.item.ImageList;
 import com.yet.project.web.exception.admin.item.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.net.jsse.PEMFile;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotNull;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/items")
@@ -22,8 +33,12 @@ import java.util.List;
 @Slf4j
 public class ItemRestController {
 
+    @Value("${file.dir}")
+    String fileDir;
+
     private final ItemMapper itemMapper;
     private final ItemService itemService;
+    private final Util util;
 
     @GetMapping
     ItemPaging firstPage(
@@ -113,59 +128,68 @@ public class ItemRestController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity addItem(AddItemForm addItemForm) {
-        if (addItemForm == null) {
-            throw new IllegalArgumentException();
+    public ResponseEntity addItem(@Validated @NotNull(message = "{NotNull}") AddItemForm addItemForm, BindingResult bindingResult) throws IOException {
+        log.info("bindingResult {}", bindingResult);
+        if (bindingResult.hasErrors()) {
+            return APIResponseEntity.bindingError(bindingResult);
         }
-
-        String name = addItemForm.getName();
-        String nameKor = addItemForm.getNameKor();
-        Long price = addItemForm.getPrice();
-        Long quantity = addItemForm.getQuantity();
-        Long brandId = addItemForm.getBrandId();
-        Long categoryId = addItemForm.getCategoryId();
-
-        if (name == null || nameKor == null || price == null || quantity == null || brandId == null || categoryId == null) {
-            throw new IllegalArgumentException();
-        }
-
-        if (price < 0 || quantity < 0) {
-            throw new IllegalArgumentException();
-        }
-
 
         //bad request
         if (!itemService.isBrand(addItemForm.getBrandId())) {
             throw new BrandMismatchException();
         }
+
         if (!itemService.isCategory(addItemForm.getCategoryId())) {
             throw new CategoryMismatchException();
         }
+
         if (addItemForm.getSubcategoryId() != null && !itemService.isSubcategory(addItemForm.getSubcategoryId())) {
             throw new SubcategoryMismatchException();
         }
 
-
         //202 옳은 요청이지만 실행되지 않음.
-        Boolean added = itemService.addItem(addItemForm);
-        if (!added) {
+        Long itemId = itemService.addItem(addItemForm);
+
+        if (addItemForm.getImages() != null && !addItemForm.getImages().isEmpty()) {
+            List<MultipartFile> images = addItemForm.getImages();
+            //파일 저장
+            Map<String, String> storedResult = itemService.storeImages(images, fileDir);
+
+            //DB에 정보 저장
+            itemService.saveImageInfoList(itemId, storedResult);
+        }
+
+        if (itemId == null) {
             return ResponseEntity.accepted().build();
         }
 
         //200
-        return ResponseEntity.ok().build();
+        return APIResponseEntity.success("");
     }
 
+
     @PostMapping("/edit")
-    public ResponseEntity editItem(EditItemForm editItemForm) {
+    public ResponseEntity editItem(@Validated EditItemForm editItemForm, BindingResult bindingResult) throws IOException {
 
-
-        if (editItemForm.getId() == null || editItemForm.getName() == null || editItemForm.getNameKor() == null || editItemForm.getPrice() == null || editItemForm.getQuantity() == null || editItemForm.getBrandId() == null || editItemForm.getSubcategoryId() == null || editItemForm.getCategoryId() == null) {
-            throw new IllegalArgumentException();
+        if (bindingResult.hasErrors()) {
+            return APIResponseEntity.bindingError(bindingResult);
         }
 
         itemService.editForJoinedItemEditFormByEditForm(editItemForm);
-        log.info("editItemForm {} ", editItemForm);
+
+        if (editItemForm.getImages() != null && !editItemForm.getImages().isEmpty()) {
+            List<MultipartFile> images = editItemForm.getImages();
+            Map<String, String> storedResult = itemService.storeImages(images, fileDir);
+            itemService.saveImageInfoList(editItemForm.getId(), storedResult);
+        }
+
+        //돌아 가는 지 확인해보기
+        if (editItemForm.getDeleteImages() != null && !editItemForm.getDeleteImages().isEmpty()) {
+            List<String> deleteImages = editItemForm.getDeleteImages();
+            itemService.removeImagesByUUID(deleteImages, fileDir);
+            List<Image> images = itemService.findImagesByUuids(deleteImages);
+            itemService.removeImagesInfoList(editItemForm.getId(), images);
+        }
 
         return ResponseEntity.ok().build();
     }
@@ -177,12 +201,20 @@ public class ItemRestController {
         return item;
     }
 
+    @GetMapping("/images/{fileName}")
+    @ResponseBody
+    public ResponseEntity<UrlResource> downloadImage(@PathVariable("fileName") String uuid) throws MalformedURLException {
+        Image image = itemService.getImageByUuid(uuid);
+        String fileName = image.getName() + "." + image.getExtention();
+        ResponseEntity<UrlResource> fileResponse = util.getFileResponse(fileName, uuid);
+        return fileResponse;
+    }
 
-//    @GetMapping
-//    public List<ItemJoined> responsePageByParam(ItemSearchDto itemSearchDto) {
-//        List<ItemJoined> itemList = itemService.getItemsByCondition(itemSearchDto);
-//        return itemList;
-//    }
+    @GetMapping("/attaches/{itemId}")
+    public APIResponseEntity responseImageIdList(@PathVariable Long itemId) {
+        ImageList imageList = itemService.getImageIdListByItemId(itemId);
+        return APIResponseEntity.success(imageList);
+    }
 
 
 }

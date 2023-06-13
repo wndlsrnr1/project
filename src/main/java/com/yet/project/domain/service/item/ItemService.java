@@ -4,11 +4,16 @@ import com.yet.project.domain.item.*;
 import com.yet.project.repository.dao.item.ItemDao;
 import com.yet.project.repository.mybatismapper.item.ItemMapper;
 import com.yet.project.web.dto.item.*;
+import com.yet.project.web.dto.request.item.AddItemForm;
+import com.yet.project.web.dto.response.item.ImageList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -290,10 +295,10 @@ public class ItemService {
         return subcategoryList;
     }
 
-    public Boolean addItem(AddItemForm addItemForm) {
+    public Long addItem(AddItemForm addItemForm) {
+        Item item = new Item();
         try {
             //item
-            Item item = new Item();
             item.setPrice(addItemForm.getPrice());
             item.setQuantity(addItemForm.getQuantity());
             item.setName(addItemForm.getName());
@@ -318,10 +323,10 @@ public class ItemService {
             itemCategory.setCategoryId(addItemForm.getCategoryId());
             itemMapper.insertItemCategory(itemCategory);
         } catch (Exception e) {
-            return false;
+            return null;
         }
 
-        return true;
+        return item.getId();
     }
 
     public Boolean isBrand(Long brandId) {
@@ -376,5 +381,104 @@ public class ItemService {
         itemSubcategory.setSubcategoryId(editItemForm.getSubcategoryId());
         itemMapper.updateItemSubcategory(itemSubcategory);
 
+    }
+
+    public Map<String, String> storeImages(List<MultipartFile> images, String fileDir) throws IOException {
+        Map<String, String> map = new HashMap<>();
+        for (MultipartFile image : images) {
+            if (image.getSize() == 0) {
+                continue;
+            }
+            String storedName = storeImage(image, fileDir);
+            map.put(storedName, image.getOriginalFilename());
+        }
+        return map;
+    }
+
+    public String storeImage(MultipartFile file, String fileDir) throws IOException {
+        String uuid = UUID.randomUUID().toString();
+        file.transferTo(new File(fileDir + uuid));
+        return uuid;
+    }
+
+    public void saveImageInfoList(Long itemId, Map<String, String> images) {
+        for (String uuid : images.keySet()) {
+            String originalFileName = images.get(uuid);
+            saveImageInfo(itemId, uuid, originalFileName);
+        }
+    }
+
+    public void saveImageInfo(Long itemId, String uuid, String originalFilename) {
+
+        String[] split = originalFilename.split("\\.");
+        String fileName = split[0];
+        String extend = split.length > 1 ? split[split.length - 1] : "";
+
+        Image image = new Image();
+        image.setUuid(uuid);
+        image.setExtention(extend);
+        image.setName(fileName);
+
+        itemMapper.insertImage(image);
+
+        ItemImage itemImage = new ItemImage();
+        itemImage.setImageId(image.getId());
+        itemImage.setItemId(itemId);
+        log.info("itemImage {}", itemImage);
+        itemMapper.insertItemImage(itemImage);
+    }
+
+    public String getFileFillPath(String uuid, String fileDir) {
+        return fileDir + uuid;
+    }
+
+
+    public Image getImageByItemIdAndUuid(Long itemId, String storedFileName) {
+        return itemMapper.selectImageByItemIdAndUuid(itemId, storedFileName);
+    }
+
+    public Image getImageByUuid(String uuid) {
+        return itemMapper.selectImageByUUid(uuid);
+    }
+
+    public ImageList getImageIdListByItemId(Long itemId) {
+        List<Image> imageList = itemMapper.selectImagesByItemId(itemId);
+        ImageList imageList1 = new ImageList();
+        imageList1.setImageList(imageList);
+        return imageList1;
+    }
+
+    public void removeImagesByUUID(List<String> deleteImages, String fileDir) {
+        for (String deleteImage : deleteImages) {
+            removeImageByUUID(deleteImage, fileDir);
+        }
+    }
+
+    public void removeImageByUUID(String uuid, String fileDir) {
+        File file = new File(fileDir + uuid);
+        if (file.exists()) {
+            if (!file.delete()) {
+                log.error("file delete fail" + uuid);
+            }
+        }
+    }
+
+    public void removeImagesInfoList(Long id, List<Image> result) {
+        for (Image image : result) {
+            removeImageInfoList(id, image.getId());
+        }
+    }
+
+    public void removeImageInfoList(Long id, Long imageId) {
+        itemMapper.deleteImageByImageId(imageId);
+    }
+
+    public List<Image> findImagesByUuids(List<String> deleteImages) {
+        List<Image> imageList = new ArrayList<>();
+        for (String uuid : deleteImages) {
+            Image image = itemMapper.selectImageByUUid(uuid);
+            imageList.add(image);
+        }
+        return imageList;
     }
 }

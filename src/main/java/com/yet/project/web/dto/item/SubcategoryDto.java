@@ -7,6 +7,6 @@ import java.util.List;
 
 @Data
 public class SubcategoryDto {
-    Long categoryId;
-    List<Subcategory> subcategoryList;
+    private Long categoryId;
+    private List<Subcategory> subcategoryList;
 }

@@ -4,15 +4,15 @@ import lombok.Data;
 
 @Data
 public class ItemJoined {
-    Long id;
-    String name;
-    String nameKor;
-    Long quantity;
-    Long price;
-    String brandNameKor;
-    String categoryNameKor;
-    String subcategoryNameKor;
-    Long brandId;
-    Long categoryId;
-    Long subcategoryId;
+    private Long id;
+    private String name;
+    private String nameKor;
+    private Long quantity;
+    private Long price;
+    private String brandNameKor;
+    private String categoryNameKor;
+    private String subcategoryNameKor;
+    private Long brandId;
+    private Long categoryId;
+    private Long subcategoryId;
 }

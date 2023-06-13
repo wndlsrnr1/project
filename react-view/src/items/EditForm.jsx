@@ -1,7 +1,7 @@
 import React, {useContext, useState, useCallback, useEffect} from "react";
 import {
   Alert,
-  Button,
+  Button, Card, CardImg, CardImgOverlay,
   Col,
   Form,
   FormGroup,
@@ -16,24 +16,6 @@ import {
 import {actionObj, ItemsContext} from "./ItemsMain";
 import {editFormObjDefault} from "../constant/Constant";
 
-const errorDefault = {
-  hasError: false,
-  name: false,
-  nameKor: false,
-  price: false,
-  quantity: false,
-  brandId: false,
-  categoryId: false,
-  subcategoryId: false,
-  nameMessage: "",
-  nameKorMessage: "",
-  priceMessage: "",
-  quantityMessage: "",
-  brandIdMessage: "",
-  categoryIdMessage: "",
-  subcategoryIdMessage: ""
-}
-
 
 const EditForm = () => {
 
@@ -42,62 +24,33 @@ const EditForm = () => {
   const [subcategories, setSubcategories] = useState({subcategoryList: []});
   const [categories, setCategories] = useState([]);
   const [itemData, setItemData] = useState(editFormObjDefault);
-  const [errors, setErrors] = useState(errorDefault);
+  const [imageList, setImageList] = useState([]);
+  const [deleteImageList, setDeleteImageList] = useState([]);
+  const [fieldError, setFieldError] = useState({});
 
-  const errorCheck = (data) => {
-    const errors = {...errorDefault};
-
-    Object.keys(data).forEach((key, index) => {
-      let value = data[key];
-      if (value == null || !value || value === -1) {
-        errors.hasError = true;
-        errors[key] = true;
-        errors[key + "Message"] = key + " can not be null";
-        return;
-      }
-
-      if (key === "price" || key === "quantity") {
-        if (Number.isNaN(value)) {
-          errors.hasError = true;
-          errors[key] = true;
-          errors[key + "Message"] = key + " can not be string";
-          return;
-        }
-
-        if (parseInt(value) < 0) {
-          errors.hasError = true;
-          errors[key] = true;
-          errors[key + "Message"] = key + " can not be less than 0";
-        }
-      }
-    });
-
-    return errors;
-  }
-
-  const onClickCancel = () => {
-    dispatch({type: actionObj.editToggle, editModal: editModal});
+  const resetValues = () => {
     dispatch({type: actionObj.setEditItemId, editItemId: -1});
     setItemData(editFormObjDefault);
     setCategories([]);
     setBrands([]);
     setSubcategories([]);
-    setErrors(errorDefault);
+    setDeleteImageList([]);
+    setImageList([]);
+    setFieldError({});
   }
 
+  const onClickCancel = () => {
+    dispatch({type: actionObj.editToggle, editModal: editModal});
+    resetValues();
+  }
 
   const onSubmitEditForm = (event) => {
     event.preventDefault();
 
-    const errorObj = errorCheck(itemData);
-
-    if (errorObj.hasError) {
-      setErrors(errorObj);
-      return;
-    }
-
     let formData = new FormData(event.target);
     formData.append("id", itemData.id);
+    formData.append("deleteImages", deleteImageList);
+
     //함수가 생성될때 itemData 값이 기억됨.
     fetch("/admin/items/edit", {
       method: "POST",
@@ -107,14 +60,16 @@ const EditForm = () => {
         dispatch({type: actionObj.changeSearchState, searchState: {...searchState}});
         dispatch({type: actionObj.editToggle, editModal: editModal});
         dispatch({type: actionObj.setEditItemId, editItemId: -1});
-        setErrors(errorDefault);
         console.log("성공");
-      } else {
-        console.log("실패");
+        resetValues();
+
+      } else if (response.status === 400) {
+        response.json().then(data => {
+          setFieldError(data.fieldErrors);
+          console.log(data.fieldErrors);
+        });
       }
     });
-
-
   }
 
   //modal initial data
@@ -132,6 +87,23 @@ const EditForm = () => {
       const itemData = await (await fetch("/admin/items/get/" + editItemId)).json();
       const brandData = await (await fetch("/admin/items/get/brands")).json();
       const categoriesData = await (await fetch("/admin/items/get/categories")).json();
+
+      const imageNames = await (await fetch("/admin/items/attaches/" + editItemId).then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        return null;
+      })
+        .then(data => {
+          if (data === null) {
+            return [];
+          }
+          return data.data.imageList
+        }));
+
+      console.log("imageNames", imageNames);
+
+
       const subcategoriesData = await (await fetch("/admin/items/get/subcategory/" + itemData.categoryId)
           .then(response => {
             if (response.ok) {
@@ -145,8 +117,8 @@ const EditForm = () => {
       setCategories(categoriesData);
       setSubcategories(subcategoriesData);
       setItemData(itemData);
+      setImageList(imageNames);
 
-      console.log(subcategoriesData)
     }
 
     getEditData();
@@ -191,89 +163,135 @@ const EditForm = () => {
     setItemData(updateData);
   };
 
-  return (
-    <Modal isOpen={editModal} size={"lg"}>
-      <Form onSubmit={onSubmitEditForm} action={"/admin/items/edit"} method={"post"}>
-        <ModalHeader closeButton hideCloseButton={true} className={"text-xs"}>상품 수정</ModalHeader>
-        <ModalBody className={"text-xxl"}>
-          <FormGroup row className={"mb-3"}>
-            <Label sm={2}>영어 이름</Label>
-            <Col sm={10}>
-              <Input name={"name"} value={itemData.name} onChange={onChangeInput}/>
-              {errors.name ? <Alert sm={10} color={"danger"} size={"sm"}
-                                    className={"mt-2 p-1 mb-0 ps-3"}>{errors.nameMessage}</Alert> : null}
-            </Col>
-          </FormGroup>
-          <FormGroup row className={"mb-3"}>
-            <Label sm={2}>한글 이름</Label>
-            <Col sm={10}>
-              <Input name={"nameKor"} value={itemData.nameKor} onChange={onChangeInput}/>
-              {errors.nameKor ? <Alert sm={10} color={"danger"} size={"sm"}
-                                       className={"mt-2 p-1 mb-0 ps-3"}>{errors.nameKorMessage}</Alert> : null}
-            </Col>
+  const onClickDeleteImage = (name) => {
+    const updatedImageList = imageList.filter(elem => {
+      if (elem.uuid !== name) {
+        return true
+      }
+    });
 
-          </FormGroup>
-          <FormGroup row className={"mb-3"}>
-            <Label sm={2}>가격</Label>
-            <Col sm={10}>
-              <Input name={"price"} type={"number"} value={itemData.price} onChange={onChangeInput}/>
-              {errors.price ? <Alert sm={10} color={"danger"} size={"sm"}
-                                     className={"mt-2 p-1 mb-0 ps-3"}>{errors.priceMessage}</Alert> : null}
-            </Col>
-          </FormGroup>
-          <FormGroup row className={"mb-3"}>
-            <Label sm={2}>수량</Label>
-            <Col sm={10}>
-              <Input name={"quantity"} type={"number"} value={itemData.quantity} onChange={onChangeInput}/>
-              {errors.quantity ? <Alert sm={10} color={"danger"} size={"sm"}
-                                        className={"mt-2 p-1 mb-0 ps-3"}>{errors.quantityMessage}</Alert> : null}
-            </Col>
+    setDeleteImageList([...deleteImageList, name]);
+    setImageList([...updatedImageList]);
+  }
 
-          </FormGroup>
-          <FormGroup row className={"mb-3"}>
-            <Label sm={2}>브랜드</Label>
-            <Col sm={10}>
-              <Input type={"select"} name={"brandId"} value={itemData.brandId} onChange={onChangeSelect}>
-                {
-                  brands.length !== 0 ? brands.map(brand => {
-                    return <option value={brand.id} name={"brandId"}>{brand.nameKor}</option>
-                  }) : <option>선택</option>
-                }
-              </Input>
-            </Col>
-          </FormGroup>
-          <FormGroup row className={"mb-3"}>
-            <Label sm={2}>카테고리</Label>
-            <Col sm={10}>
-              <Input type={"select"} name={"categoryId"} onChange={onChangeSelect} value={itemData.categoryId}>
-                {
-                  categories.length !== 0 ? categories.map(category => {
-                    return <option value={category.id}>{category.nameKor}</option>
-                  }) : <option>선택</option>
-                }
-              </Input>
-            </Col>
-          </FormGroup>
-          <FormGroup row className={"mb-3"}>
-            <Label sm={2}>서브 카테고리</Label>
-            <Col sm={10}>
-              <Input type={"select"} name={"subcategoryId"} value={itemData.subcategoryId} onChange={onChangeSelect}>
-                {
-                  Object.keys(subcategories).length !== 0 && subcategories.subcategoryList.length !== 0 ? subcategories.subcategoryList.map(subcategory => {
-                    return <option value={subcategory.id}>{subcategory.nameKor}</option>
-                  }) : <option value={""}>없음</option>
-                }
-              </Input>
-            </Col>
-          </FormGroup>
-        </ModalBody>
-        <ModalFooter>
-          <Button type={"submit"} color={"primary"}>확인</Button>
-          <Button color={"secondary"} type={"button"} onClick={onClickCancel}>취소</Button>
-        </ModalFooter>
-      </Form>
-    </Modal>
-  );
+  const limitFileMax = (event) => {
+    const images = event.target.files;
+    if (images.length > 3) {
+      event.target.value = '';
+    }
+  }
+
+return (
+  <Modal isOpen={editModal} size={"lg"}>
+    <Form onSubmit={onSubmitEditForm} action={"/admin/items/edit"} method={"post"} encType={"multipart/form-data"}>
+      <ModalHeader closeButton hideCloseButton={true} className={"text-xs"}>상품 수정</ModalHeader>
+      <ModalBody className={"text-xxl"}>
+        <FormGroup row className={"mb-3"}>
+          <Label sm={2}>영어 이름</Label>
+          <Col sm={10}>
+            <Input name={"name"} value={itemData.name} onChange={onChangeInput}/>
+            {fieldError.name ? <Alert sm={10} color={"danger"} size={"sm"}
+                                  className={"mt-2 p-1 mb-0 ps-3"}>{fieldError.name}</Alert> : null}
+          </Col>
+        </FormGroup>
+        <FormGroup row className={"mb-3"}>
+          <Label sm={2}>한글 이름</Label>
+          <Col sm={10}>
+            <Input name={"nameKor"} value={itemData.nameKor} onChange={onChangeInput}/>
+            {fieldError.nameKor ? <Alert sm={10} color={"danger"} size={"sm"}
+                                      className={"mt-2 p-1 mb-0 ps-3"}>{fieldError.nameKor}</Alert> : null}
+          </Col>
+
+        </FormGroup>
+        <FormGroup row className={"mb-3"}>
+          <Label sm={2}>가격</Label>
+          <Col sm={10}>
+            <Input name={"price"} type={"number"} value={itemData.price} onChange={onChangeInput}/>
+            {fieldError.price ? <Alert sm={10} color={"danger"} size={"sm"}
+                                         className={"mt-2 p-1 mb-0 ps-3"}>{fieldError.price}</Alert> : null}
+          </Col>
+        </FormGroup>
+        <FormGroup row className={"mb-3"}>
+          <Label sm={2}>수량</Label>
+          <Col sm={10}>
+            <Input name={"quantity"} type={"number"} value={itemData.quantity} onChange={onChangeInput}/>
+            {fieldError.quantity ? <Alert sm={10} color={"danger"} size={"sm"}
+                                       className={"mt-2 p-1 mb-0 ps-3"}>{fieldError.quantity}</Alert> : null}
+          </Col>
+
+        </FormGroup>
+        <FormGroup row className={"mb-3"}>
+          <Label sm={2}>브랜드</Label>
+          <Col sm={10}>
+            <Input type={"select"} name={"brandId"} value={itemData.brandId} onChange={onChangeSelect}>
+              {
+                brands.length !== 0 ? brands.map(brand => {
+                  return <option value={brand.id} name={"brandId"}>{brand.nameKor}</option>
+                }) : <option>선택</option>
+              }
+            </Input>
+          </Col>
+        </FormGroup>
+        <FormGroup row className={"mb-3"}>
+          <Label sm={2}>카테고리</Label>
+          <Col sm={10}>
+            <Input type={"select"} name={"categoryId"} onChange={onChangeSelect} value={itemData.categoryId}>
+              {
+                categories.length !== 0 ? categories.map(category => {
+                  return <option value={category.id}>{category.nameKor}</option>
+                }) : <option>선택</option>
+              }
+            </Input>
+          </Col>
+        </FormGroup>
+        <FormGroup row className={"mb-3"}>
+          <Label sm={2}>서브 카테고리</Label>
+          <Col sm={10}>
+            <Input type={"select"} name={"subcategoryId"} value={itemData.subcategoryId} onChange={onChangeSelect}>
+              {
+                Object.keys(subcategories).length !== 0 && subcategories.subcategoryList.length !== 0 ? subcategories.subcategoryList.map(subcategory => {
+                  return <option value={subcategory.id}>{subcategory.nameKor}</option>
+                }) : <option value={""}>없음</option>
+              }
+            </Input>
+          </Col>
+        </FormGroup>
+        <div style={{display: "flex"}} className={"mb-3"}>
+          {
+            imageList.map(image => {
+              console.log(image);
+              return (
+                <Card style={{height: "150px", maxWidth: "200px", alignItems: "center"}}>
+                  <CardImg src={"/admin/items/images/" + image.uuid} style={{height: "100%"}}/>
+                  <CardImgOverlay className={"p-0"}>
+                    <button onClick={() => onClickDeleteImage(image.uuid)}
+                            type={"button"}
+                            className={"p-0 text-center bg-transparent text-black-50 border-0 font-weight-bold"}
+                            style={{float: "right", height: "30px", width: "30px", fontWeight: "bold"}}
+                    >X
+                    </button>
+                  </CardImgOverlay>
+                </Card>
+              )
+
+            })
+          }
+        </div>
+        <FormGroup>
+          <Label sm={2}>이미지 업로드</Label>
+          <Input
+            id={"image_upload"} name={"images"} type={"file"} accept={"image/png, image/jpeg"} multiple={true} onChange={limitFileMax}/>
+        </FormGroup>
+
+      </ModalBody>
+      <ModalFooter>
+        <Button type={"submit"} color={"primary"}>확인</Button>
+        <Button color={"secondary"} type={"button"} onClick={onClickCancel}>취소</Button>
+      </ModalFooter>
+    </Form>
+  </Modal>
+);
+
 }
 
 export default EditForm;

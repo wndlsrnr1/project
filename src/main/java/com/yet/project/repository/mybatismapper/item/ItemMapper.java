@@ -1,10 +1,7 @@
 package com.yet.project.repository.mybatismapper.item;
 
 import com.yet.project.domain.item.*;
-import com.yet.project.web.dto.item.EditItemForm;
-import com.yet.project.web.dto.item.ItemJoined;
-import com.yet.project.web.dto.item.ItemSearchDto;
-import com.yet.project.web.dto.item.SubCategoryJoined;
+import com.yet.project.web.dto.item.*;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -237,6 +234,33 @@ public interface ItemMapper {
 
     @Delete("delete from item_subcategory where itemId = #{itemId}")
     void deleteItemSubcategory(ItemSubcategory itemSubcategory);
+
+    @Insert("insert into image (uuid, name, extention) values (#{uuid}, #{name}, #{extention})")
+    @Options(useGeneratedKeys = true, keyProperty = "id")
+    void insertImage(Image storedImage);
+
+    @Insert("insert into item_image (item_id, image_id) values (#{itemId}, #{imageId})")
+    void insertItemImage(ItemImage itemImage);
+
+    @Select("select image_id from item_image where item_id = #{itemId}")
+    List<Long> selectItemImageByItemId(String itemId);
+
+    //@Select("select i.name from image as i join item_image as ii on ii.item_id = i.id where ii.item_id = #{itemId}")
+    @Select("select i.uuid from image as i join item_image as ii on ii.image_id = i.id where ii.item_id = #{itemId}")
+    List<String> selectImageNamesByItemId(Long itemId);
+
+    @Select("select i.uuid, i.name, i.id, i.extention from image as i join item_image as ii on ii.image_id = i.id where ii.item_id = #{itemId}")
+    List<Image> selectImagesByItemId(Long itemId);
+
+    @Select("select i.id, i.name, i.uuid, i.extention from image as i join item_image as ii on i.id = ii.image_id where ii.item_id = #{itemId}")
+    Image selectImageByItemIdAndUuid(Long itemId, String storedFileName);
+
+    @Select("select id, name, uuid, extention from image where uuid = #{uuid}")
+    Image selectImageByUUid(String uuid);
+
+    @Delete("delete from image where id = #{imageId}")
+    void deleteImageByImageId(Long imageId);
+
 
 
 
