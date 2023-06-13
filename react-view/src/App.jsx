@@ -32,7 +32,6 @@ const App = () => {
         <Switch>
           <Route path={"/admin/items"} exact component={ItemsMain}/>
           <Route path={"/admin"} exact component={AdminMain}/>
-          <Redirect to={"/login"} exact componet={RedirectLogin}/>
         </Switch>
       </BrowserRouter> : null
   );
