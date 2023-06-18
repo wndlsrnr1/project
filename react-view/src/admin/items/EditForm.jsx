@@ -14,7 +14,7 @@ import {
 } from "reactstrap";
 
 import {actionObj, ItemsContext} from "./ItemsMain";
-import {editFormObjDefault} from "../constant/Constant";
+import {editFormObjDefault} from "../../constant/Constant";
 
 
 const EditForm = () => {

@@ -1,5 +1,5 @@
 import React, {createContext, useMemo, useReducer, useEffect} from "react";
-import {Container} from "reactstrap";
+import {Container, Row} from "reactstrap";
 import Search from "./Search";
 import ItemList from "./ItemList";
 import Buttons from "./Buttons";
@@ -162,9 +162,9 @@ const ItemsMain = () => {
   return (
     <ItemsContext.Provider value={values}>
       <Container style={{maxWidth: "800px"}}>
-        <div className={"py-5 text-center"}>
+        <Row className={"py-5 text-center"}>
           <h2>상품 목록</h2>
-        </div>
+        </Row>
         <Search/>
         <hr className={"my-4"}/>
         <ItemList/>

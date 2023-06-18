@@ -1,11 +1,10 @@
-import logo from './logo.svg';
 import './App.css';
 import {BrowserRouter, Redirect, Route, Router, Switch} from "react-router-dom";
-import ItemsMain from "./items/ItemsMain";
+import ItemsMain from "./admin/items/ItemsMain";
 import {Component, useEffect, useState} from "react";
 import AdminMain from "./admin/AdminMain";
-import RedirectLogin from "./authorization/RedirectLogin"
 import {domain} from "./constant/Constant";
+import HomeMain from "./home/HomeMain";
 
 const App = () => {
 
@@ -30,9 +29,9 @@ const App = () => {
   return (auth ?
       <BrowserRouter>
         <Switch>
+          <Route path={"/"} exact component={HomeMain}/>
           <Route path={"/admin/items"} exact component={ItemsMain}/>
           <Route path={"/admin"} exact component={AdminMain}/>
-          <Redirect to={"/login"} exact componet={RedirectLogin}/>
         </Switch>
       </BrowserRouter> : null
   );
