@@ -37,11 +37,9 @@ public class LoginInterceptor implements HandlerInterceptor {
                 return false;
             } else {
                 AuthError authError = new AuthError(HttpStatus.UNAUTHORIZED.value(), "noneAuthorize", requestURI);
-
                 response.setContentType("application/json");
                 response.getWriter().write(objectMapper.writeValueAsString(authError));
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
-
                 return false;
             }
         }
