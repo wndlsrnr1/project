@@ -30,6 +30,7 @@ const ShowCategory = () => {
   useEffect(() => {
     if (loaded) return;
     setLoaded(true);
+
     fetch("/items/categories").then(response => {
       if (!response.ok) return;
       return response.json();
@@ -51,6 +52,7 @@ const ShowCategory = () => {
     });
 
   }, []);
+
 
   return (
     <>
@@ -78,7 +80,7 @@ const ShowCategory = () => {
             })
           }
           {
-            !Object.keys(subCategory) ? null : Object.keys(subCategory).map((data, index) => {
+            category.length === 0 || !Object.keys(subCategory) ? null : Object.keys(subCategory).map((data, index) => {
               return (
                 <Tooltip isOpen={categoryToggle[data]} target={"category_" + data} List placement={"right"} autohide={false}
                          toggle={() => toggle(data)} style={{background: "transparent", padding: "5px"}} className={"p-0"}>

@@ -1,5 +1,6 @@
 package com.yet.project.web.controller.item;
 
+import com.yet.project.domain.item.Brand;
 import com.yet.project.domain.item.Category;
 import com.yet.project.domain.item.Subcategory;
 import com.yet.project.domain.service.item.ItemService;
@@ -35,6 +36,12 @@ public class CommonItemController {
     public ResponseEntity requestSubcategoryAll() {
         Map<Long, List<Subcategory>> subcategoryAllByCategoryId = itemService.getSubcategoryAllByCategoryId();
         return APIResponseEntity.success(subcategoryAllByCategoryId);
+    }
+
+    @GetMapping("/brands/most")
+    public ResponseEntity requestMostBrands() {
+        List<Brand> brandListAll = itemService.getBrandListAll();
+        return APIResponseEntity.success(brandListAll);
     }
 
 }
