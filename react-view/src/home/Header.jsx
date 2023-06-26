@@ -1,6 +1,8 @@
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 import {Badge, Col, Tooltip} from "reactstrap";
 import {Link} from "react-router-dom";
+import {domain} from "../constant/Constant";
+import {UniversalContext} from "../App";
 
 const Header = () => {
 
@@ -10,8 +12,22 @@ const Header = () => {
   const toggle1 = () => setMyPageListToggle(!myPageListToggle);
   const toggle2 = () => setCommunityListToggle(!communityListToggle);
 
+  const {dispatch, isLoggedIn} = useContext(UniversalContext);
+
+  const linkList = {
+    login: "/login",
+
+  }
+  console.log(isLoggedIn);
+  const myPage = (isLoggedIn) => {
+    if (isLoggedIn) {
+      return "";
+    }
+    return domain + "/login"
+  }
   return (
     <>
+
       <header className={"pe-lg-5 ps-lg-5 pb-lg-3 pt-lg-1 border-bottom mb-3 d-flex justify-content-between"}>
         {/*왼쪽*/}
         <div>
@@ -20,9 +36,9 @@ const Header = () => {
         </div>
         {/*오른쪽*/}
         <div>
-          <Badge color={"grey"} href={"#"} className={"text-secondary"}>로그인</Badge>
-          <Badge color={"grey"} href={"#"} className={"text-secondary"}>회원가입</Badge>
-          <Badge color={"grey"} href={"#"} className={"text-secondary"} id={"my-page"}>마이페이지</Badge>
+          {isLoggedIn ? null : <Badge color={"grey"} href={domain + "/login"} className={"text-secondary"}>로그인</Badge>}
+          {isLoggedIn ? null : <Badge color={"grey"} href={domain + "/login/join"} className={"text-secondary"}>회원가입</Badge>}
+          {isLoggedIn ? <Badge color={"grey"} href={"#"} className={"text-secondary"} id={"my-page"}>마이페이지</Badge> : <Badge color={"grey"} href={domain + "/login"} className={"text-secondary"} id={"my-page"}>마이페이지</Badge>}
           <Badge color={"grey"} href={"#"} className={"text-secondary"}>장바구니</Badge>
           <Badge color={"grey"} href={"#"} className={"text-secondary"}>주문조회</Badge>
           <Badge id={"community"} color={"grey"} href={"#"} className={"text-secondary"}>커뮤니티</Badge>

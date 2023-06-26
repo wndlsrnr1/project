@@ -2,8 +2,11 @@ package com.yet.project.repository.mybatismapper.item;
 
 import com.yet.project.domain.item.*;
 import com.yet.project.web.dto.item.*;
+import com.yet.project.web.dto.request.item.AddEventForm;
+import com.yet.project.web.dto.response.item.EventResponse;
 import org.apache.ibatis.annotations.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Mapper
@@ -261,10 +264,36 @@ public interface ItemMapper {
     @Delete("delete from image where id = #{imageId}")
     void deleteImageByImageId(Long imageId);
 
+//    @Select({
+//            "select id, name, name_kor from item",
+//            "where name like concat('%', #{itemName}, '%')",
+//            "and not exists(select 1 from event where item.id = event.item_id)",
+//            "order by id asc limit 15",
+//    })
+    @Select({
+            "select id, name, name_kor from item",
+            "where name like concat('%', #{itemName}, '%')",
+            "or name like concat(#{itemName}, '%')",
+            "or name like concat('%', #{itemName})",
+            "or name like concat('%', #{name}, '%')",
+            "or name like concat(#{name}, '%')",
+            "or name like concat('%', #{name})",
+            "order by id asc limit 15",
+    })
+    List<Item> selectItemsByNameLimit15(String itemName);
 
+    @Insert("insert into event (item_id, image_id, start_date, end_date, priority) values (#{itemId}, #{imageId}, #{startDate}, #{endDate}, 1)")
+    @Options(useGeneratedKeys = true, keyProperty = "id")
+    void insertEvent(AddEventForm addEventForm);
 
+    @Select("select id, name, uuid, extention from image where id = #{imageId}")
+    Image selectImageById(Long imageId);
 
+    @Select("select e.id, e.item_id, e.image_id, e.start_date, e.end_date, e.priority, i.name, i.name_kor from event as e join item as i on e.item_id = i.id where e.end_date > #{now}")
+    List<EventResponse> selectEventNotOutdated(LocalDate now);
 
+    @Select("select e.id, e.item_id, e.image_id, e.start_date, e.end_date, e.priority, i.name, i.name_kor from event as e join item as i on e.item_id = i.id where e.end_date <= #{now} order by e.end_date desc limit 100")
+    List<EventResponse> selectEventOutdated(LocalDate now);
 
     /*
     @Select("select uid, email, password from users where email = #{email}")

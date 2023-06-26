@@ -8,6 +8,7 @@ import com.yet.project.domain.service.user.UserService;
 import com.yet.project.web.enums.user.SocialName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -34,9 +35,12 @@ public class LoginController {
     private final static String APP_ADMIN = "99827a82a26373a3a8b1008bdb062d5a";
     private final static String SOCIAL_KAKAO = "kakao";
 
+    @Value("${reactUrl}")
+    String reactUrl;
 
     @ModelAttribute("required")
     public Map<Integer, Agreement> requiredAgreements() {
+
         return userDao.findAgreementRequiredMap();
     }
 
@@ -48,7 +52,7 @@ public class LoginController {
     @GetMapping
     public String loginRequest(@ModelAttribute("loginForm") LoginForm loginForm, HttpSession session) {
         if (session.getAttribute("uid") != null) {
-            return "redirect:/";
+            return "redirect:" + reactUrl;
         }
         return "/login/login";
     }
@@ -63,7 +67,7 @@ public class LoginController {
 
         //이미 로그인된 상태
         if (session.getAttribute("uid") != null) {
-            return "redirect:/";
+            return "redirect:" + reactUrl;
         }
 
         User user = userService.getUserInDbByForm(loginForm);
@@ -78,7 +82,7 @@ public class LoginController {
             session.setAttribute("uid", user.getUid());
         }
         //성공
-        return "redirect:/";
+        return "redirect:" + reactUrl;
     }
 
 
@@ -88,7 +92,7 @@ public class LoginController {
         if (session != null && uid != null) {
             session.invalidate();
         }
-        return "redirect:/";
+        return "redirect:" + reactUrl;
     }
 
     @GetMapping("/join")
@@ -141,14 +145,14 @@ public class LoginController {
         //DB에 저장
         userService.userJoin(join);
 
-        return "redirect:/";
+        return "redirect:" + reactUrl;
     }
 
     //uid 변수화 하기
     @GetMapping("/unregister")
     public String unregisterFormRequest(@ModelAttribute("unregisterForm") UnregisterForm unregisterForm, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
         if (session == null || uid == null) {
-            return "redirect:/";
+            return "redirect:" + reactUrl;
         }
 
         User basicUserInfo = new User();
@@ -165,7 +169,7 @@ public class LoginController {
     @PostMapping("/unregister")
     public String sendUnregisterRequest(@Validated @ModelAttribute("unregisterForm") UnregisterForm unregisterForm, BindingResult bindingResult, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
         if (session == null || uid == null) {
-            return "redirect:/";
+            return "redirect:" + reactUrl;
         }
 
         //삭제하고자 하는 email과 지금 세션에 등록된 uid로 조회된 id가 다르면 거절
@@ -210,13 +214,13 @@ public class LoginController {
 
         userService.unregisterUser(unregisterUser);
         session.invalidate();
-        return "redirect:/";
+        return "redirect:" + reactUrl;
     }
 
     @GetMapping("/unregister/kakao")
     public String unregisterKakaoRequest(@ModelAttribute("unregisterForm") UnregisterFormKakao unregisterForm, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
         if (session == null || uid == null) {
-            return "redirect:/";
+            return "redirect:" + reactUrl;
         }
 
         User basicUserInfo = new User();
@@ -232,7 +236,7 @@ public class LoginController {
     @PostMapping("/unregister/kakao")
     public String sendUnregisterKakaoRequest(@Validated @ModelAttribute("unregisterForm") UnregisterFormKakao unregisterForm, BindingResult bindingResult, HttpSession session, @SessionAttribute("uid") Long uid, Model model) {
         if (session == null || uid == null) {
-            return "redirect:/";
+            return "redirect:" + reactUrl;
         }
 
         //삭제하고자 하는 email과 지금 세션에 등록된 uid로 조회된 id가 다르면 거절
@@ -259,7 +263,7 @@ public class LoginController {
 
         userService.unregisterUser(unregisterUser);
         session.invalidate();
-        return "redirect:/";
+        return "redirect:" + reactUrl;
     }
 
 
@@ -331,7 +335,7 @@ public class LoginController {
 
         session.setAttribute("uid", user.getUid());
         log.info("uid {}", session.getAttribute("uid"));
-        return "redirect:/";
+        return "redirect:" + reactUrl;
     }
 
 
@@ -350,7 +354,7 @@ public class LoginController {
         if (socialName.equals(SOCIAL_KAKAO)) {
             return "/login/kakaojoin";
         }
-        return "redirect:/";
+        return "redirect:" + reactUrl;
     }
 
 
@@ -399,10 +403,10 @@ public class LoginController {
             Long kakaoIdLong = Long.parseLong(kakaoId);
             User userKakao = userService.findUserKakao(kakaoIdLong);
             session.setAttribute("uid", userKakao.getUid());
-            return "redirect:/";
+            return "redirect:" + reactUrl;
         }
 
-        return "redirect:/";
+        return "redirect:" + reactUrl;
     }
 
 

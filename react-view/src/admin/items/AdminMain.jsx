@@ -1,6 +1,6 @@
 import {Container, NavItem, NavLink} from "reactstrap";
 import React from "react";
-import {domain} from "../constant/Constant";
+import {domain} from "../../constant/Constant";
 
 
 const AdminMain = () => {
@@ -13,6 +13,9 @@ const AdminMain = () => {
         </NavItem>
         <NavItem>
           <NavLink href={domain + "/admin/item/categories/manage"}>카테고리 관리 바로가기</NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink href={"/admin/event"}>이벤트 관리 바로가기</NavLink>
         </NavItem>
       </Container>
     </React.Fragment>

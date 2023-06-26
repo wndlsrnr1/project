@@ -1,0 +1,13 @@
+The builder pattern is a design pattern that allows for the  creation of objects in a more flexible and readable way,
+especially when dealing with classes that have a large number of optional parameters.
+It provides an alternative to using multiple constuctors or long paramter lists
+
+Lombok is a library that simplifies Java code by providing annotaions to generate
+bolierplate code automatically
+One of the annotations provided by Lombok is @Builder,
+which can be used in conjunction with otehr Lombok annotations like @NAC AAC to generate a builder pattern  implementation for a class
+
+the builder class has methods to set values for each filed of When @builder is applied to a class, Lombok automatically generates a nested static builder class within that class.
+the class and a build method to construct the final object.
+
+Here's an example to illustrate how the builder pattern works with Lombok's @Builder annotation.

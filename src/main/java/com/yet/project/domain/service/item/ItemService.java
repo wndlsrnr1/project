@@ -4,16 +4,25 @@ import com.yet.project.domain.item.*;
 import com.yet.project.repository.dao.item.ItemDao;
 import com.yet.project.repository.mybatismapper.item.ItemMapper;
 import com.yet.project.web.dto.item.*;
+import com.yet.project.web.dto.request.item.AddEventForm;
 import com.yet.project.web.dto.request.item.AddItemForm;
+import com.yet.project.web.dto.response.common.APIResponseEntity;
+import com.yet.project.web.dto.response.item.EventResponse;
 import com.yet.project.web.dto.response.item.ImageList;
+import com.yet.project.web.dto.response.item.ItemAndImageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.Response;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -480,5 +489,58 @@ public class ItemService {
             imageList.add(image);
         }
         return imageList;
+    }
+
+    public List<ItemAndImageResponse> getPromotionItems() {
+
+        return null;
+    }
+
+    public List<Item> getItemsUpTo15(String itemName) {
+        List<Item> itemList = itemMapper.selectItemsByNameLimit15(itemName);
+        return itemList;
+    }
+
+    public void addEvent(AddEventForm addEventForm) {
+        itemMapper.insertEvent(addEventForm);
+    }
+
+    public BindingResult addEventFormErrorCheck(AddEventForm addEventForm, BindingResult bindingResult) {
+        Long itemId = addEventForm.getItemId();
+
+        Item item = itemMapper.selectItemById(itemId);
+        if (item == null) {
+            bindingResult.rejectValue("itemId", "Null", "선택한 아이템이 없습니다");
+        }
+
+
+        LocalDate endDate = addEventForm.getEndDate();
+        LocalDate startDate = addEventForm.getStartDate();
+
+        if (startDate.compareTo(endDate) > 0) {
+            bindingResult.rejectValue("startDate", "AddEventForm", "시작일이 종료일보다 늦을 수 없습니다");
+            bindingResult.rejectValue("endDate", "AddEventForm", "종료일이 시작일보다 빠를 수 없습니다");
+        }
+
+        Long imageId = addEventForm.getImageId();
+
+        if (imageId != null) {
+            Image image = itemMapper.selectImageById(addEventForm.getImageId());
+            if (image == null) {
+                bindingResult.rejectValue("image", "Null", "요청한 이미지가 없습니다.");
+            }
+        }
+
+        return bindingResult;
+    }
+
+    public List<EventResponse> getEventItems(Boolean outdated) {
+        LocalDate now = LocalDate.now();
+        if (!outdated) {
+            List<EventResponse> eventResponses = itemMapper.selectEventNotOutdated(now);
+            return eventResponses;
+        }
+        List<EventResponse> eventResponses = itemMapper.selectEventOutdated(now);
+        return eventResponses;
     }
 }
