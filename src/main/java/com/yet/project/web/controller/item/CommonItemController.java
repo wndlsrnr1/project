@@ -2,16 +2,17 @@ package com.yet.project.web.controller.item;
 
 import com.yet.project.domain.item.Brand;
 import com.yet.project.domain.item.Category;
+import com.yet.project.domain.item.Item;
 import com.yet.project.domain.item.Subcategory;
 import com.yet.project.domain.service.item.ItemService;
 import com.yet.project.repository.mybatismapper.item.ItemMapper;
 import com.yet.project.web.dto.response.common.APIResponseEntity;
+import com.yet.project.web.dto.response.item.ItemAndImageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -43,5 +44,15 @@ public class CommonItemController {
         List<Brand> brandListAll = itemService.getBrandListAll();
         return APIResponseEntity.success(brandListAll);
     }
+
+    @GetMapping("/event")
+    public ResponseEntity requestPromotionItems() {
+        List<ItemAndImageResponse> pmItems = itemService.getPromotionItems();
+        return APIResponseEntity.success(pmItems);
+    }
+
+
+
+
 
 }

@@ -11,8 +11,11 @@ import com.yet.project.domain.service.item.ItemService;
 import com.yet.project.web.dto.item.AddSubcategoryForm;
 import com.yet.project.web.dto.item.ItemJoined;
 import com.yet.project.web.dto.item.UpdateSubcategory;
+import com.yet.project.web.dto.request.item.AddEventForm;
+import com.yet.project.web.dto.response.common.APIResponseEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -164,6 +167,14 @@ public class ItemController {
         itemService.renameSubcategory(updateSubcategoryForm);
         return "redirect:/admin/item/categories/manage";
     }
+
+    @GetMapping("/items/search")
+    public ResponseEntity requestSubmitSearch(@RequestParam(name = "item_name", required = false) String itemName) {
+        List<Item> itemList = itemService.getItemsUpTo15(itemName);
+        return APIResponseEntity.success(itemList);
+    }
+
+
 
 
 }

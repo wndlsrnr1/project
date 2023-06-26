@@ -5,6 +5,7 @@ import com.yet.project.domain.user.UserKakao;
 import com.yet.project.repository.dao.item.ItemDao;
 import com.yet.project.repository.mybatismapper.user.UserMapper;
 import com.yet.project.service.AJ;
+import com.yet.project.web.dto.request.item.AddEventForm;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mybatis.spring.annotation.MapperScan;
@@ -212,6 +213,11 @@ class ItemMapperTest {
         itemDao.removeCategoryById(categoryById.getId());
         Category categoryById1 = itemDao.findCategoryById(category.getId());
         AJ.assertThat(categoryById1).isNull();
+    }
 
+    @Test
+    void insertEventTest() {
+        AddEventForm addEventForm = new AddEventForm();
+        List<Item> itemList = itemMapper.selectItemsLimit15();
     }
 }

@@ -7,8 +7,10 @@ import com.yet.project.domain.service.common.Util;
 import com.yet.project.domain.service.item.ItemService;
 import com.yet.project.repository.mybatismapper.item.ItemMapper;
 import com.yet.project.web.dto.item.*;
+import com.yet.project.web.dto.request.item.AddEventForm;
 import com.yet.project.web.dto.request.item.AddItemForm;
 import com.yet.project.web.dto.response.common.APIResponseEntity;
+import com.yet.project.web.dto.response.item.EventResponse;
 import com.yet.project.web.dto.response.item.ImageList;
 import com.yet.project.web.exception.admin.item.*;
 import lombok.RequiredArgsConstructor;
@@ -217,4 +219,28 @@ public class ItemRestController {
     }
 
 
+    @PostMapping("/event")
+    public ResponseEntity addNewEvent(@Validated @RequestBody AddEventForm addEventForm, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return APIResponseEntity.bindingError(bindingResult);
+        }
+
+        //서비스 오류
+        itemService.addEventFormErrorCheck(addEventForm, bindingResult);
+        if (bindingResult.hasErrors()) {
+            return APIResponseEntity.bindingError(bindingResult);
+        }
+
+        itemService.addEvent(addEventForm);
+
+        log.info("addEventForm {}", addEventForm);
+        return APIResponseEntity.ok().build();
+    }
+
+    @GetMapping("/events")
+    public ResponseEntity requestEventItems(@RequestParam(value = "outdated", defaultValue = "false") Boolean outdated) {
+        List<EventResponse> eventResponse = itemService.getEventItems(outdated);
+        log.info("eventResponse {} ", eventResponse);
+        return APIResponseEntity.success(eventResponse);
+    }
 }

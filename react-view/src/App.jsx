@@ -2,9 +2,10 @@ import './App.css';
 import {BrowserRouter, Redirect, Route, Router, Switch} from "react-router-dom";
 import ItemsMain from "./admin/items/ItemsMain";
 import {Component, createContext, useEffect, useReducer, useState} from "react";
-import AdminMain from "./admin/AdminMain";
+import AdminMain from "./admin/items/AdminMain";
 import {domain} from "./constant/Constant";
 import HomeMain from "./home/HomeMain";
+import EventMain from "./admin/event/EventMain";
 
 
 export const UniversalContext = createContext({
@@ -76,30 +77,13 @@ const App = () => {
     });
   }, [isLoggedIn]);
 
-  // useEffect(() => {
-  //   if (!auth) return;
-  //   const currentURL = window.location.href;
-  //   const uri = new URL(currentURL).pathname;
-  //
-  //   fetch(uri, {
-  //     method: "GET"
-  //   })
-  //     .then(response => {
-  //       console.log(response.status);
-  //       console.log("response", response.ok);
-  //       if (!response.ok) window.location.href = domain + uri;;
-  //       console.log("response", response.ok);
-  //
-  //     });
-  // }, [auth]);
-
-
   return (auth ?
       <UniversalContext.Provider value={values}>
         <BrowserRouter>
           <Switch>
             <Route path={"/"} exact component={HomeMain}/>
             <Route path={"/admin/items"} exact component={ItemsMain}/>
+            <Route path={"/admin/event"} exact component={EventMain}/>
             <Route path={"/admin"} exact component={AdminMain}/>
           </Switch>
         </BrowserRouter>
