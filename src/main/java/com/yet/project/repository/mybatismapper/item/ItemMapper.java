@@ -3,6 +3,7 @@ package com.yet.project.repository.mybatismapper.item;
 import com.yet.project.domain.item.*;
 import com.yet.project.web.dto.item.*;
 import com.yet.project.web.dto.request.item.AddEventForm;
+import com.yet.project.web.dto.request.item.EventPriority;
 import com.yet.project.web.dto.response.item.EventResponse;
 import org.apache.ibatis.annotations.*;
 
@@ -289,12 +290,15 @@ public interface ItemMapper {
     @Select("select id, name, uuid, extention from image where id = #{imageId}")
     Image selectImageById(Long imageId);
 
-    @Select("select e.id, e.item_id, e.image_id, e.start_date, e.end_date, e.priority, i.name, i.name_kor from event as e join item as i on e.item_id = i.id where e.end_date > #{now}")
+    @Select("select e.id, e.item_id, e.image_id, e.start_date, e.end_date, e.priority, i.name, i.name_kor from event as e join item as i on e.item_id = i.id where e.end_date > #{now} order by e.priority asc")
     List<EventResponse> selectEventNotOutdated(LocalDate now);
 
-    @Select("select e.id, e.item_id, e.image_id, e.start_date, e.end_date, e.priority, i.name, i.name_kor from event as e join item as i on e.item_id = i.id where e.end_date <= #{now} order by e.end_date desc limit 100")
+    @Select("select e.id, e.item_id, e.image_id, e.start_date, e.end_date, e.priority, i.name, i.name_kor from event as e join item as i on e.item_id = i.id where e.end_date <= #{now} order by e.priority asc limit 100")
     List<EventResponse> selectEventOutdated(LocalDate now);
 
+    @Update("update event set id = #{id}, priority = #{priority} where id = #{id}")
+    void updateEventPriority(EventPriority eventPriority);
+//    @Update("UPDATE brand SET name = #{name}, name_kor = #{nameKor} WHERE id = #{id}")
     /*
     @Select("select uid, email, password from users where email = #{email}")
     User selectUserByEmail(String email);
