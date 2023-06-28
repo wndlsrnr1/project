@@ -6,6 +6,8 @@ import com.yet.project.repository.mybatismapper.item.ItemMapper;
 import com.yet.project.web.dto.item.*;
 import com.yet.project.web.dto.request.item.AddEventForm;
 import com.yet.project.web.dto.request.item.AddItemForm;
+import com.yet.project.web.dto.request.item.EventPriority;
+import com.yet.project.web.dto.request.item.EventPriorityList;
 import com.yet.project.web.dto.response.common.APIResponseEntity;
 import com.yet.project.web.dto.response.item.EventResponse;
 import com.yet.project.web.dto.response.item.ImageList;
@@ -542,5 +544,12 @@ public class ItemService {
         }
         List<EventResponse> eventResponses = itemMapper.selectEventOutdated(now);
         return eventResponses;
+    }
+
+    public void updateEventsPriority(EventPriorityList eventPriorityList) {
+        List<EventPriority> priorityList = eventPriorityList.getPriorityList();
+        for (EventPriority eventPriority : priorityList) {
+            itemMapper.updateEventPriority(eventPriority);
+        }
     }
 }
